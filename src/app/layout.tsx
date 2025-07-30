@@ -1,4 +1,5 @@
 import 'nextra-theme-blog/style.css';
+import './globals.css'
 import type { Metadata } from 'next';
 import { Head } from 'nextra/components';
 import { Footer, Layout, Navbar } from 'nextra-theme-blog';
