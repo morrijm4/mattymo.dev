@@ -9,7 +9,7 @@ export default function Home() {
             <p>
             </p>
             <p>
-                Feel free to email me at j.matthew.morrison1@gmail.com.
+                Feel free to email me at <a href="mailto:j.matthew.morrison1@gmail.com">j.matthew.morrison1@gmail.com</a>.
             </p>
 
         </>

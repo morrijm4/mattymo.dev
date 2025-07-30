@@ -16,7 +16,7 @@ const roboto = Roboto_Mono({
 
 export default async function RootLayout({ children }: PropsWithChildren) {
     return (
-        <html lang="en" className={'dark ' + roboto.className} style={{ colorScheme: 'dark' }}>
+        <html lang="en" className={roboto.className + ' dark'} style={{ colorScheme: 'dark' }}>
             <Head backgroundColor={{ dark: '#24273a', light: '#eff1f5' }} />
             <body>
                 <Layout>
