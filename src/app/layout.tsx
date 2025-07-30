@@ -1,7 +1,7 @@
 import 'nextra-theme-blog/style.css';
 import type { Metadata } from 'next';
 import { Head } from 'nextra/components';
-import { Footer, Layout, Navbar, ThemeSwitch } from 'nextra-theme-blog';
+import { Footer, Layout, Navbar } from 'nextra-theme-blog';
 import type { PropsWithChildren } from 'react';
 import { getPageMap } from 'nextra/page-map';
 
@@ -15,9 +15,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <Head backgroundColor={{ dark: '#24273a', light: '#eff1f5' }} />
             <body>
                 <Layout>
-                    <Navbar pageMap={await getPageMap()}>
-                        <ThemeSwitch />
-                    </Navbar>
+                    <Navbar pageMap={await getPageMap()} />
                     {children}
                     <Footer>
                         <abbr

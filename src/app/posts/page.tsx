@@ -9,7 +9,6 @@ export const metadata: Metadata = {
 
 export default async function Posts() {
     const posts = await getPosts();
-    console.log('posts', posts);
 
     return (
         <div>
