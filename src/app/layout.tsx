@@ -8,7 +8,6 @@ import type { PropsWithChildren } from 'react';
 import { getPageMap } from 'nextra/page-map';
 import { Roboto_Mono } from 'next/font/google';
 import { RSS } from '@/icons/rss';
-import { GitHub } from '@/icons/github';
 
 export const metadata: Metadata = {
     title: 'mattymo.dev',
