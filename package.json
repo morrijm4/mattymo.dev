@@ -1,51 +1,29 @@
 {
-  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/package.json",
-  "name": "vite-website",
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "bun ./watch.tsx",
-    "deploy": "vite build && cdk deploy --profile personal-profile.dev",
-    "diff": "cdk diff --profile personal-profile.dev",
-    "preview": "vite preview",
-    "sso": "aws sso login --profile personal-profile.dev",
-    "ssg": "bun ./build.tsx",
-    "typecheck": "tsc"
-  },
-  "dependencies": {
-    "@tailwindcss/vite": "^4.0.6",
-    "aws-cdk": "^2.1013.0",
-    "aws-cdk-lib": "^2.194.0",
-    "constructs": "^10.4.2",
-    "htmx.org": "2.0.4",
-    "showdown": "^2.1.0",
-    "tailwindcss": "^4.0.6",
-    "typed-html": "^3.0.1",
-    "vite": "^6.0.11"
-  },
-  "devDependencies": {
-    "@types/bun": "^1.1.18",
-    "@types/react": "^19.0.7",
-    "@types/react-dom": "^19.0.3",
-    "@types/showdown": "^2.0.6",
-    "chokidar": "^4.0.3",
-    "prettier": "^3.5.1",
-    "prettier-plugin-tailwindcss": "^0.6.11",
-    "typed-htmx": "^0.3.1",
-    "typescript": "^5.7.3"
-  },
-  "devEngines": {
-    "runtime": {
-      "name": "node",
-      "verson": "23.6.0"
-    },
-    "packageManager": {
-      "name": "bun",
-      "version": "1.1.45"
-    }
-  },
-  "engines": {
-    "node": "23.6.0"
-  },
-  "packageManager": "bun@1.1.45"
+	"name": "mattymo.dev",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint"
+	},
+	"dependencies": {
+		"next": "15.4.4",
+		"nextra": "^4.2.17",
+		"nextra-theme-blog": "^4.2.17",
+		"react": "19.1.0",
+		"react-dom": "19.1.0"
+	},
+	"devDependencies": {
+		"typescript": "^5",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"@tailwindcss/postcss": "^4",
+		"tailwindcss": "^4",
+		"eslint": "^9",
+		"eslint-config-next": "15.4.4",
+		"@eslint/eslintrc": "^3"
+	}
 }
