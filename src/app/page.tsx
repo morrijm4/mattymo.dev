@@ -1,7 +1,7 @@
-import { ExperienceListItem } from "./ui/experience-list-item";
-import { GraduationCap } from "./icons/graduation-cap";
-import { Briefcase } from "./icons/briefcase";
-import { HandWave } from "./icons/hand-wave";
+import { ExperienceListItem } from "@/ui/experience-list-item";
+import { GraduationCap } from "@/icons/graduation-cap";
+import { Briefcase } from "@/icons/briefcase";
+import { HandWave } from "@/icons/hand-wave";
 
 export default function Home() {
     return (
