@@ -1,9 +1,15 @@
 import { ExperienceListItem } from "./ui/experience-list-item";
+import { GraduationCap } from "./icons/graduation-cap";
+import { Briefcase } from "./icons/briefcase";
+import { HandWave } from "./icons/hand-wave";
 
 export default function Home() {
     return (
         <>
-            <h1>Hello!👋</h1>
+            <h1 className="flex gap-2">
+                <HandWave width={36} className="fill-white" />
+                Hello!
+            </h1>
             <p>
                 My name is Matthew Morrison. I am a software engineer, climber, guitarist, and golfer. I live in New York City and I am a graduate student at <a href="https://tech.cornell.edu/">Cornell Tech</a> earning a Master of Engineering in Computer Science degree.
             </p>
@@ -13,7 +19,10 @@ export default function Home() {
             <p>
                 Feel free to email me at <a href="mailto:j.matthew.morrison1@gmail.com">j.matthew.morrison1@gmail.com</a>.
             </p>
-            <h2>Experience</h2>
+            <h2 className="flex items-center gap-2">
+                <Briefcase width={24} className="fill-white" />
+                Experience
+            </h2>
             <h3>Asurion</h3>
             <p>3 years 3 months</p>
             <ul>
@@ -23,7 +32,10 @@ export default function Home() {
                 <ExperienceListItem title="Software Engineer 1" date="Sep 2022 - Sep 2023" />
                 <ExperienceListItem title="Software Engineer Intern" date="May 2022 - Aug 2022" />
             </ul>
-            <h2>Education</h2>
+            <h2 className="flex items-center gap-2">
+                <GraduationCap width={24} className="fill-white" />
+                Education
+            </h2>
             <h3>Cornell Tech</h3>
             <p>
                 Aug 2025 - May 2026

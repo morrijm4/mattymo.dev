@@ -6,6 +6,7 @@ export default {
         type: 'page',
     },
     posts: {
+        title: 'Blog',
         type: 'page',
     },
 } satisfies MetaRecord;

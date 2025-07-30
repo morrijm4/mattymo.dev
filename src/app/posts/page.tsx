@@ -1,11 +1,5 @@
 import { PostCard } from 'nextra-theme-blog';
 import { getPosts } from './get-posts';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Posts',
-    description: 'A list of all posts on mattymo.dev.',
-};
 
 export default async function Posts() {
     const posts = await getPosts();
