@@ -4,14 +4,19 @@ import { Head } from 'nextra/components';
 import { Footer, Layout, Navbar } from 'nextra-theme-blog';
 import type { PropsWithChildren } from 'react';
 import { getPageMap } from 'nextra/page-map';
+import { Roboto_Mono } from 'next/font/google';
 
 export const metadata: Metadata = {
     title: 'mattymo.dev',
 };
 
+const roboto = Roboto_Mono({
+    subsets: ['latin'],
+});
+
 export default async function RootLayout({ children }: PropsWithChildren) {
     return (
-        <html lang="en" className='dark' style={{ colorScheme: 'dark' }}>
+        <html lang="en" className={'dark ' + roboto.className} style={{ colorScheme: 'dark' }}>
             <Head backgroundColor={{ dark: '#24273a', light: '#eff1f5' }} />
             <body>
                 <Layout>
