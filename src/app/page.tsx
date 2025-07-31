@@ -1,13 +1,10 @@
-import { ExperienceListItem } from "@/ui/experience-list-item";
-import { GraduationCap } from "@/icons/graduation-cap";
-import { Briefcase } from "@/icons/briefcase";
-import { HandWave } from "@/icons/hand-wave";
+import { GraduationCap } from "./icons/graduation-cap";
+import { Briefcase } from "./icons/briefcase";
 
 export default function Home() {
     return (
         <>
             <h1 className="flex gap-2">
-                <HandWave width={36} className="fill-white" />
                 Hello!
             </h1>
             <p>
@@ -24,13 +21,13 @@ export default function Home() {
                 Experience
             </h2>
             <h3>Asurion</h3>
-            <p>3 years 3 months</p>
+            <p>May 2022 - Jul 2025</p>
             <ul>
-                <ExperienceListItem title="Tech Lead" date="Mar 2025 - Jul 2025" />
-                <ExperienceListItem title="Senior Software Engineer 3" date="Sep 2024 - Mar 2025" />
-                <ExperienceListItem title="Software Engineer 2" date="Sep 2023 - Nov 2024" />
-                <ExperienceListItem title="Software Engineer 1" date="Sep 2022 - Sep 2023" />
-                <ExperienceListItem title="Software Engineer Intern" date="May 2022 - Aug 2022" />
+                <li>Tech Lead</li>
+                <li>Senior Software Engineer 3</li>
+                <li>Software Engineer 2</li>
+                <li>Software Engineer 1</li>
+                <li>Software Engineer Intern</li>
             </ul>
             <h2 className="flex items-center gap-2">
                 <GraduationCap width={24} className="fill-white" />

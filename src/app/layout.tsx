@@ -7,7 +7,7 @@ import { Footer, Layout, Navbar } from 'nextra-theme-blog';
 import type { PropsWithChildren } from 'react';
 import { getPageMap } from 'nextra/page-map';
 import { Roboto_Mono } from 'next/font/google';
-import { RSS } from '@/icons/rss';
+import { RSS } from './icons/rss';
 
 export const metadata: Metadata = {
     title: 'mattymo.dev',
