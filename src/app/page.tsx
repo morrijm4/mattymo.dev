@@ -1,6 +1,8 @@
 export default function Home() {
     return (
         <>
+            <br />
+            <br />
             <h1 className="flex gap-2">
                 Hello!
             </h1>
@@ -11,11 +13,13 @@ export default function Home() {
             <p>
             </p>
             <p>
-                Feel free to email me at <a href="mailto:j.matthew.morrison1@gmail.com">j.matthew.morrison1@gmail.com</a>.
+                <a href="mailto:j.matthew.morrison1@gmail.com">j.matthew.morrison1@gmail.com</a>
             </p>
-            <h2 className="flex items-center gap-2">
+            <br />
+            <br />
+            <h1 className="flex items-center gap-2">
                 Experience
-            </h2>
+            </h1>
             <h3>Asurion</h3>
             <p>May 2022 - Jul 2025</p>
             <ul>
@@ -25,9 +29,11 @@ export default function Home() {
                 <li>Software Engineer 1</li>
                 <li>Software Engineer Intern</li>
             </ul>
-            <h2 className="flex items-center gap-2">
+            <br />
+            <br />
+            <h1 className="flex items-center gap-2">
                 Education
-            </h2>
+            </h1>
             <h3>Cornell Tech</h3>
             <p>
                 Aug 2025 - May 2026
