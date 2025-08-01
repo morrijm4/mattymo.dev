@@ -8,6 +8,8 @@ import type { PropsWithChildren } from 'react';
 import { getPageMap } from 'nextra/page-map';
 import { Roboto_Mono } from 'next/font/google';
 import { RSS } from './icons/rss';
+import { GitHub } from './icons/github';
+import { Linkedin } from './icons/linkedin-svgrepo-com';
 
 export const metadata: Metadata = {
     title: 'mattymo.dev',
@@ -42,13 +44,13 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                             </div>
                             <div className="flex space-x-2 items-center">
                                 <a href='https://github.com/morrijm4/'>
-                                    <Image src="/github.svg" alt="GitHub" width={16} height={16} className='m-0' />
+                                    <GitHub width={16} height={16} className='fill-black dark:fill-white' />
                                 </a>
                                 <a href='https://www.linkedin.com/in/james-matthew-morrison/'>
-                                    <Image src="/linkedin-logo.png" alt="Linkedin" width={16} height={16} className='m-0' />
+                                    <Linkedin width={16} height={16} className='fill-black dark:fill-white' />
                                 </a>
                                 <a href="/feed.xml">
-                                    <RSS className="fill-white" width={16} />
+                                    <RSS className="fill-black dark:fill-white" width={16} />
                                 </a>
                             </div>
                         </div>
