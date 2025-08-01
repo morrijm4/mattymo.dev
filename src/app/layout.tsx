@@ -3,7 +3,7 @@ import './globals.css'
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Head } from 'nextra/components';
-import { Footer, Layout, Navbar } from 'nextra-theme-blog';
+import { Footer, Layout, Navbar, ThemeSwitch } from 'nextra-theme-blog';
 import type { PropsWithChildren } from 'react';
 import { getPageMap } from 'nextra/page-map';
 import { Roboto_Mono } from 'next/font/google';
@@ -23,8 +23,12 @@ export default async function RootLayout({ children }: PropsWithChildren) {
             <Head backgroundColor={{ dark: '#24273a', light: '#eff1f5' }} />
             <body>
                 <Layout>
-                    <Navbar pageMap={await getPageMap()} />
-                    {children}
+                    <Navbar pageMap={await getPageMap()}>
+                        <ThemeSwitch />
+                    </Navbar>
+                    <div className='pl-4'>
+                        {children}
+                    </div>
                     <Footer>
                         <div className="flex justify-between">
                             <div>

@@ -1,6 +1,3 @@
-import { GraduationCap } from "./icons/graduation-cap";
-import { Briefcase } from "./icons/briefcase";
-
 export default function Home() {
     return (
         <>
@@ -17,7 +14,6 @@ export default function Home() {
                 Feel free to email me at <a href="mailto:j.matthew.morrison1@gmail.com">j.matthew.morrison1@gmail.com</a>.
             </p>
             <h2 className="flex items-center gap-2">
-                <Briefcase width={24} className="fill-white" />
                 Experience
             </h2>
             <h3>Asurion</h3>
@@ -30,7 +26,6 @@ export default function Home() {
                 <li>Software Engineer Intern</li>
             </ul>
             <h2 className="flex items-center gap-2">
-                <GraduationCap width={24} className="fill-white" />
                 Education
             </h2>
             <h3>Cornell Tech</h3>

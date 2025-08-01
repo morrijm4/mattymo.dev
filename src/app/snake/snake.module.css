@@ -1,9 +1,0 @@
-.play-button {
-    padding-inline: clamp(var(--spacing) * 1, 2vw, var(--spacing) * 4);
-    padding-block: clamp(var(--spacing) * 0.25, 1vw, var(--spacing) * 1);
-}
-
-.custom-border {
-    border-width: clamp(0.1px, 0.1vh, 1px);
-    border-color: white;
-}

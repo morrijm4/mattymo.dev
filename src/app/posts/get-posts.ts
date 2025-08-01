@@ -10,5 +10,5 @@ export async function getPosts(): Promise<Item[]> {
 
     return directories
         .filter(dir => dir.name !== 'index')
-        .sort((a, b) => Number(new Date(b.frontMatter.date)) - Number(new Date(a.frontMatter.date)))
+        .sort((a, b) => Number(new Date(b.frontMatter?.date)) - Number(new Date(a.frontMatter?.date)))
 }
