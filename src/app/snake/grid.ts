@@ -1,9 +1,9 @@
-import { Box } from './box';
+import { Box, type BoxOptions } from './box';
 import { Point } from "./point";
 
 export interface GridOptions {
-    rows: number;
-    cols: number;
+    rows?: number;
+    cols?: number;
 };
 
 export class Grid {
@@ -12,7 +12,7 @@ export class Grid {
     rows: number;
     cols: number;
 
-    constructor({ rows, cols }: GridOptions) {
+    constructor({ rows = 11, cols = 11 }: GridOptions = {}) {
         this.rows = rows;
         this.cols = cols;
 
@@ -21,6 +21,21 @@ export class Grid {
                 status: 'empty',
             }));
         })
+    }
+
+    includes({ x, y }: Point): boolean {
+        return x >= 0 && x < this.rows && y >= 0 && y < this.cols;
+    }
+
+    update(point: Point, opts: BoxOptions): Grid {
+        const box = this.getBox(point);
+
+        this.setBox(point, {
+            ...box,
+            ...opts,
+        });
+
+        return this;
     }
 
     getBox(point: Point): Box {

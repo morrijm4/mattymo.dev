@@ -1,59 +1,142 @@
 import { Grid } from './grid';
-import { Point } from './point';
-import { Box } from './box';
+import { Point, type Direction } from './point';
 
 export interface SnakeOptions {
-    grid?: Grid
-    head?: Point;
-    tail?: Point;
+    grid?: Grid;
     food?: Point;
-}
+    snake?: Point[];
+    score?: number;
+    gameOver?: boolean;
+    direction?: Direction;
+};
 
 export class SnakeState {
-    grid: Grid;
+    INITIAL_SPEED = 300;
 
-    head: Point | undefined;
-    tail: Point | undefined;
+    grid: Grid;
     food: Point | undefined;
+    snake: Point[];
+    score: number;
+    gameOver: boolean;
+    direction: Direction | undefined;
 
     constructor({
-        grid = new Grid({ rows: 11, cols: 11 }),
-        head,
-        tail,
+        grid = new Grid(),
         food,
+        snake = [],
+        score = 0,
+        gameOver = false,
+        direction,
     }: SnakeOptions = {}) {
         this.grid = grid;
-        this.head = head;
-        this.tail = tail;
         this.food = food;
+        this.snake = snake;
+        this.score = score;
+        this.gameOver = gameOver;
+        this.direction = direction
     }
 
     init(): SnakeState {
-        this.head = new Point(
-            this.#half(this.grid.rows),
-            this.#half(this.grid.cols),
+        const head = new Point({
+            x: this.#half(this.grid.rows),
+            y: this.#half(this.grid.cols),
+        });
+
+        this.snake.push(
+            head,
+            head.copy().move('down'),
+            head.copy().move('down', 2),
         );
 
-        this.tail = this.head;
-        this.grid.setBox(this.head, new Box({ status: 'snake' }));
+        for (const point of this.snake) {
+            this.grid.update(point, { status: 'snake' });
+        }
 
         this.food = this.createFoodPoint();
-        this.grid.setBox(this.food, new Box({ status: 'food' }));
+        this.grid.update(this.food, { status: 'food' });
+
+        this.direction = 'up';
+
+        return this;
+    }
+
+    move(direction: Direction): SnakeState {
+        if (this.gameOver) {
+            return this;
+        }
+
+        if (this.isBackwards(direction)) {
+            throw new Error('Cannot move backwords');
+        }
+
+        this.direction = direction;
+
+        const head = this.snake.at(0);
+
+        if (head == null) {
+            throw new Error('Snake does not have a head');
+        }
+
+        const next = head.copy().move(direction);
+
+        if (!this.grid.includes(next) || this.snake.some((point) => point.equals(next))) {
+            this.gameOver = true;
+            return this;
+        }
+
+        if (this.food == null) {
+            throw new Error('Food should be defined');
+        }
+
+        this.snake.unshift(next);
+        this.grid.update(next, { status: 'snake' });
+
+        if (this.food.equals(next)) {
+            this.score += 1;
+            this.food = this.createFoodPoint();
+            this.grid.update(this.food, { status: 'food' });
+            return this;
+        }
+
+        const tail = this.snake.pop();
+
+        if (tail == null) {
+            throw new Error('Snake does not have a tail');
+        }
+
+        this.grid.update(tail, { status: 'empty' });
 
         return this;
     }
 
     createFoodPoint(): Point {
-        const point = new Point(
-            this.#randNum(this.grid.rows),
-            this.#randNum(this.grid.cols),
-        );
+        const point = new Point({
+            x: this.#randNum(this.grid.rows),
+            y: this.#randNum(this.grid.cols),
+        });
 
         if (this.grid.getBox(point).status !== 'empty') {
             return this.createFoodPoint();
         }
 
         return point;
+    }
+
+    getSnakeSpeed() {
+        return Math.max(this.INITIAL_SPEED - Math.log(this.score + 1) * 60, 100);
+    }
+
+    isBackwards(direction: Direction): boolean {
+        return (
+            (this.direction === 'up' && direction === 'down') ||
+            (this.direction === 'down' && direction === 'up') ||
+            (this.direction === 'left' && direction === 'right') ||
+            (this.direction === 'right' && direction === 'left')
+        );
+    }
+
+    isPlaying(): boolean {
+        return this.snake.length !== 0 && !this.gameOver;
     }
 
     copy(): SnakeState {
@@ -67,4 +150,4 @@ export class SnakeState {
     #half(num: number): number {
         return Math.floor(num / 2);
     }
-}
+};
