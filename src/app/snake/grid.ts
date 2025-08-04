@@ -12,7 +12,7 @@ export class Grid {
     rows: number;
     cols: number;
 
-    constructor({ rows = 11, cols = 11 }: GridOptions = {}) {
+    constructor({ rows = 13, cols = 13 }: GridOptions = {}) {
         this.rows = rows;
         this.cols = cols;
 

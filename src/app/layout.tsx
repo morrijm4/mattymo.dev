@@ -1,7 +1,6 @@
 import 'nextra-theme-blog/style.css';
 import './globals.css'
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { Head } from 'nextra/components';
 import { Footer, Layout, Navbar, ThemeSwitch } from 'nextra-theme-blog';
 import type { PropsWithChildren } from 'react';
@@ -28,9 +27,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                     <Navbar pageMap={await getPageMap()}>
                         <ThemeSwitch />
                     </Navbar>
-                    <div className='pl-4'>
-                        {children}
-                    </div>
+                    {children}
                     <Footer>
                         <div className="flex justify-between">
                             <div>

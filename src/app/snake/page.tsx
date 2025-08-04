@@ -5,18 +5,20 @@ import { SnakeState } from "./snake-state";
 import { useKeyDown } from './hooks/use-key-down';
 import type { Direction } from './point';
 import { useLatest } from './hooks/use-latest';
+import { useHighScore } from './hooks/use-high-score';
+import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from './icons/arrows';
 
 type SnakeEvent = {
     type: 'play';
 } | {
     type: 'move';
-    direction: Direction
+    direction: Direction;
 };
 
 function reducer(ss: SnakeState, event: SnakeEvent): SnakeState {
     switch (event.type) {
         case 'play':
-            return new SnakeState().init();
+            return new SnakeState({ setHighScore: ss.setHighScore }).init();
         case 'move':
             return ss.copy().move(event.direction);
     }
@@ -27,47 +29,45 @@ const downKeys = ['ArrowDown', 's', 'j'];
 const leftKeys = ['ArrowLeft', 'a', 'h'];
 const rightKeys = ['ArrowRight', 'd', 'l'];
 
+const keyMap = new Map<Direction, string[]>([
+    ['up', upKeys],
+    ['down', downKeys],
+    ['left', leftKeys],
+    ['right', rightKeys],
+]);
+
 export default function Page() {
-    const [ss, dispatch] = useReducer(reducer, new SnakeState());
+    const [highScore, setHighScore] = useHighScore();
+    const [ss, dispatch] = useReducer(reducer, new SnakeState({ setHighScore }));
     const ssRef = useLatest(ss);
 
-    const up = useCallback(() => {
-        if (ssRef.current.isBackwards('up')) return;
-        dispatch({ type: 'move', direction: 'up' })
-    }, [ssRef]);
+    useKeyDown(useCallback((event) => {
+        for (const [direction, keys] of keyMap) {
+            if (
+                !keys.includes(event.key) ||
+                !ssRef.current.isInitialized() ||
+                ssRef.current.isBackwards(direction) ||
+                ssRef.current.gameOver
+            ) {
+                continue;
+            }
 
-    const down = useCallback(() => {
-        if (ssRef.current.isBackwards('down')) return;
-        dispatch({ type: 'move', direction: 'down' })
-    }, [ssRef]);
-
-    const left = useCallback(() => {
-        if (ssRef.current.isBackwards('left')) return;
-        dispatch({ type: 'move', direction: 'left' })
-    }, [ssRef]);
-
-    const right = useCallback(() => {
-        if (ssRef.current.isBackwards('right')) return;
-        dispatch({ type: 'move', direction: 'right' })
-    }, [ssRef]);
-
-    useKeyDown(upKeys, up);
-    useKeyDown(downKeys, down);
-    useKeyDown(leftKeys, left);
-    useKeyDown(rightKeys, right);
+            dispatch({ type: 'move', direction });
+        }
+    }, [ssRef]));
 
     useEffect(() => {
-        let timeout: NodeJS.Timeout;
-
-        if (ss.isPlaying()) {
-            timeout = setTimeout(() => {
-                if (ss.direction == null) {
-                    throw new Error('Direction should be defined');
-                }
-
-                dispatch({ type: 'move', direction: ss.direction });
-            }, ss.getSnakeSpeed())
+        if (!ss.isPlaying()) {
+            return;
         }
+
+        const timeout = setTimeout(() => {
+            if (ss.direction == null) {
+                throw new Error('Direction should be defined');
+            }
+
+            dispatch({ type: 'move', direction: ss.direction });
+        }, ss.getSnakeSpeed())
 
         return () => clearTimeout(timeout);
     }, [ss]);
@@ -75,33 +75,49 @@ export default function Page() {
     return (
         <div>
             <h1>Snake</h1>
-            <div className="flex flex-col-reverse">
-                {ss.grid.boxes.map((row, i) => {
-                    return <div key={`row-${i}`} className="flex">
-                        {row.map((box, j) => {
-                            const classes: string[] = ['border', 'size-5'];
-
-                            switch (box.status) {
-                                case 'food':
-                                    classes.push('bg-red-500');
-                                    break;
-                                case 'snake':
-                                    classes.push('bg-yellow-500');
-                                    break;
-                            }
-
-                            return <div key={`${box.status}-${i + j}`} className={classes.join(' ')} />;
-                        })}
-                    </div>
-                })}
+            <div className="flex justify-between h-6">
+                <p className={`m-0 ${ss.isPlaying() ? 'invisible' : ''}`}>
+                    {!ss.isInitialized() || ss.gameOver ? (
+                        <button className="border rounded-2xl px-2 py-1" onClick={() => dispatch({ type: 'play' })}>Play</button>
+                    ) : (
+                        'Press any arrow key to start.'
+                    )}
+                </p>
+                {ss.gameOver && <p className="m-0">Game over!</p>}
             </div>
-            {!ss.isPlaying() && (
-                <button onClick={() => dispatch({ type: 'play' })}>
-                    <h2>Play</h2>
-                </button>
-            )}
-            {ss.isPlaying() && <h2>Score {ss.score}</h2>}
-        </div>
+            <p className='mb-0'>Score: {ss.score}</p>
+            <p className='mt-0'>High score: {highScore}</p>
+
+            <div className="flex flex-col items-center gap-4">
+
+                <div className="flex flex-col-reverse">
+                    {ss.grid.boxes.map((row, i) => {
+                        return <div key={`row-${i}`} className="flex">
+                            {row.map((box, j) => {
+                                const classes: string[] = ['border', 'size-5'];
+                                switch (box.status) {
+                                    case 'food':
+                                        classes.push('bg-red-500');
+                                        break;
+                                    case 'snake':
+                                        classes.push('bg-yellow-500');
+                                        break;
+                                }
+                                return <div key={`${box.status}-${i + j}`} className={classes.join(' ')} />;
+                            })}
+                        </div>
+                    })}
+                </div>
+
+                <ArrowUp width={36} height={36} className='dark:fill-white border rounded-4xl lg:invisible' />
+                <div className='flex gap-12'>
+                    <ArrowLeft width={36} height={36} className='dark:fill-white border rounded-4xl lg:invisible' />
+                    <ArrowRight width={36} height={36} className='dark:fill-white border rounded-4xl lg:invisible' />
+                </div>
+                <ArrowDown width={36} height={36} className='dark:fill-white border rounded-4xl lg:invisible' />
+
+            </div>
+        </div >
     );
 }
 

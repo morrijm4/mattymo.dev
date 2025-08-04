@@ -8,6 +8,7 @@ export interface SnakeOptions {
     score?: number;
     gameOver?: boolean;
     direction?: Direction;
+    setHighScore?: (score: number) => void;
 };
 
 export class SnakeState {
@@ -20,6 +21,8 @@ export class SnakeState {
     gameOver: boolean;
     direction: Direction | undefined;
 
+    setHighScore?: (score: number) => void;
+
     constructor({
         grid = new Grid(),
         food,
@@ -27,42 +30,45 @@ export class SnakeState {
         score = 0,
         gameOver = false,
         direction,
+        setHighScore,
     }: SnakeOptions = {}) {
         this.grid = grid;
         this.food = food;
         this.snake = snake;
         this.score = score;
         this.gameOver = gameOver;
-        this.direction = direction
+        this.direction = direction;
+        this.setHighScore = setHighScore;
     }
 
     init(): SnakeState {
         const head = new Point({
-            x: this.#half(this.grid.rows),
+            x: this.#half(this.grid.rows) - 2,
             y: this.#half(this.grid.cols),
         });
 
         this.snake.push(
             head,
-            head.copy().move('down'),
-            head.copy().move('down', 2),
+            head.copy().move('left'),
+            head.copy().move('left', 2),
         );
 
         for (const point of this.snake) {
             this.grid.update(point, { status: 'snake' });
         }
 
-        this.food = this.createFoodPoint();
+        this.food = new Point({
+            x: this.#half(this.grid.rows) + 2,
+            y: this.#half(this.grid.rows),
+        });
         this.grid.update(this.food, { status: 'food' });
-
-        this.direction = 'up';
 
         return this;
     }
 
     move(direction: Direction): SnakeState {
         if (this.gameOver) {
-            return this;
+            throw new Error('Should not move when game is over');
         }
 
         if (this.isBackwards(direction)) {
@@ -81,15 +87,16 @@ export class SnakeState {
 
         if (!this.grid.includes(next) || this.snake.some((point) => point.equals(next))) {
             this.gameOver = true;
+            this.setHighScore?.(this.score);
             return this;
-        }
-
-        if (this.food == null) {
-            throw new Error('Food should be defined');
         }
 
         this.snake.unshift(next);
         this.grid.update(next, { status: 'snake' });
+
+        if (this.food == null) {
+            throw new Error('Food should be defined');
+        }
 
         if (this.food.equals(next)) {
             this.score += 1;
@@ -127,6 +134,10 @@ export class SnakeState {
     }
 
     isBackwards(direction: Direction): boolean {
+        if (this.direction == null) {
+            return direction === 'left';
+        }
+
         return (
             (this.direction === 'up' && direction === 'down') ||
             (this.direction === 'down' && direction === 'up') ||
@@ -136,7 +147,11 @@ export class SnakeState {
     }
 
     isPlaying(): boolean {
-        return this.snake.length !== 0 && !this.gameOver;
+        return this.direction != null && !this.gameOver;
+    }
+
+    isInitialized(): boolean {
+        return this.snake.length !== 0;
     }
 
     copy(): SnakeState {
