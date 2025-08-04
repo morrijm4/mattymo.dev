@@ -6,9 +6,9 @@ import { useKeyDown } from './hooks/use-key-down';
 import type { Direction } from './point';
 import { useLatest } from './hooks/use-latest';
 import { useHighScore } from './hooks/use-high-score';
-import { ArrowUp, ArrowDown, ArrowRight, ArrowLeft } from './icons/arrows';
+import { Arrow } from './ui/arrow';
 
-type SnakeEvent = {
+export type SnakeEvent = {
     type: 'play';
 } | {
     type: 'move';
@@ -38,16 +38,16 @@ const keyMap = new Map<Direction, string[]>([
 
 export default function Page() {
     const [highScore, setHighScore] = useHighScore();
-    const [ss, dispatch] = useReducer(reducer, new SnakeState({ setHighScore }));
+    const [ss, dispatch] = useReducer(reducer, new SnakeState({
+        setHighScore
+    }));
     const ssRef = useLatest(ss);
 
     useKeyDown(useCallback((event) => {
         for (const [direction, keys] of keyMap) {
             if (
                 !keys.includes(event.key) ||
-                !ssRef.current.isInitialized() ||
-                ssRef.current.isBackwards(direction) ||
-                ssRef.current.gameOver
+                !ssRef.current.canMove(direction)
             ) {
                 continue;
             }
@@ -78,7 +78,12 @@ export default function Page() {
             <div className="flex justify-between h-6">
                 <p className={`m-0 ${ss.isPlaying() ? 'invisible' : ''}`}>
                     {!ss.isInitialized() || ss.gameOver ? (
-                        <button className="border rounded-2xl px-2 py-1" onClick={() => dispatch({ type: 'play' })}>Play</button>
+                        <button
+                            className="border rounded-2xl px-2 py-1"
+                            onClick={() => dispatch({ type: 'play' })}
+                        >
+                            Play
+                        </button>
                     ) : (
                         'Press any arrow key to start.'
                     )}
@@ -94,7 +99,10 @@ export default function Page() {
                     {ss.grid.boxes.map((row, i) => {
                         return <div key={`row-${i}`} className="flex">
                             {row.map((box, j) => {
-                                const classes: string[] = ['border', 'size-5'];
+                                const classes: string[] = [
+                                    'border',
+                                    'size-5'
+                                ];
                                 switch (box.status) {
                                     case 'food':
                                         classes.push('bg-red-500');
@@ -103,18 +111,22 @@ export default function Page() {
                                         classes.push('bg-yellow-500');
                                         break;
                                 }
-                                return <div key={`${box.status}-${i + j}`} className={classes.join(' ')} />;
+                                return <div
+                                    key={`${box.status}-${i + j}`}
+                                    className={classes.join(' ')}
+                                />;
                             })}
                         </div>
                     })}
                 </div>
 
-                <ArrowUp width={36} height={36} className='dark:fill-white border rounded-4xl lg:invisible' />
+                <Arrow dispatch={dispatch} ss={ss} direction='up' />
                 <div className='flex gap-12'>
-                    <ArrowLeft width={36} height={36} className='dark:fill-white border rounded-4xl lg:invisible' />
-                    <ArrowRight width={36} height={36} className='dark:fill-white border rounded-4xl lg:invisible' />
+                    <Arrow dispatch={dispatch} ss={ss} direction='left' />
+                    <Arrow dispatch={dispatch} ss={ss} direction='right' />
                 </div>
-                <ArrowDown width={36} height={36} className='dark:fill-white border rounded-4xl lg:invisible' />
+                <Arrow dispatch={dispatch} ss={ss} direction='down' />
+
 
             </div>
         </div >

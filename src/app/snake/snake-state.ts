@@ -154,6 +154,14 @@ export class SnakeState {
         return this.snake.length !== 0;
     }
 
+    canMove(direction: Direction): boolean {
+        return (
+            this.isInitialized() &&
+            !this.isBackwards(direction) &&
+            !this.gameOver
+        );
+    }
+
     copy(): SnakeState {
         return new SnakeState(this);
     }
