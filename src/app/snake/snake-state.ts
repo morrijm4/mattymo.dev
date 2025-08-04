@@ -68,7 +68,7 @@ export class SnakeState {
 
     move(direction: Direction): SnakeState {
         if (this.gameOver) {
-            throw new Error('Should not move when game is over');
+            return this;
         }
 
         if (this.isBackwards(direction)) {

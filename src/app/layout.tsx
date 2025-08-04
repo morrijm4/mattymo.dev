@@ -18,13 +18,15 @@ const roboto = Roboto_Mono({
     subsets: ['latin'],
 });
 
+const pageMap = await getPageMap();
+
 export default async function RootLayout({ children }: PropsWithChildren) {
     return (
         <html lang="en" className={roboto.className + ' dark'} style={{ colorScheme: 'dark' }}>
             <Head backgroundColor={{ dark: '#24273a', light: '#eff1f5' }} />
             <body>
                 <Layout>
-                    <Navbar pageMap={await getPageMap()}>
+                    <Navbar pageMap={pageMap}>
                         <ThemeSwitch />
                     </Navbar>
                     {children}

@@ -11,6 +11,6 @@ export function useKeyDown(
             callback(event);
         }, { signal: controller.signal });
 
-        return controller.abort;
+        return () => controller.abort();
     }, [callback]);
 }

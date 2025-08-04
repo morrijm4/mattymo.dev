@@ -18,7 +18,8 @@ export type SnakeEvent = {
 function reducer(ss: SnakeState, event: SnakeEvent): SnakeState {
     switch (event.type) {
         case 'play':
-            return new SnakeState({ setHighScore: ss.setHighScore }).init();
+            return new SnakeState({ setHighScore: ss.setHighScore })
+                .init();
         case 'move':
             return ss.copy().move(event.direction);
     }
@@ -62,15 +63,15 @@ export default function Page() {
         }
 
         const timeout = setTimeout(() => {
-            if (ss.direction == null) {
+            if (ssRef.current.direction == null) {
                 throw new Error('Direction should be defined');
             }
 
-            dispatch({ type: 'move', direction: ss.direction });
+            dispatch({ type: 'move', direction: ssRef.current.direction });
         }, ss.getSnakeSpeed())
 
         return () => clearTimeout(timeout);
-    }, [ss]);
+    }, [ss, ssRef]);
 
     return (
         <div>
@@ -132,4 +133,3 @@ export default function Page() {
         </div >
     );
 }
-
