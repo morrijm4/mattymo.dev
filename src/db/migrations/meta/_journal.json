@@ -8,6 +8,13 @@
       "when": 1754403545985,
       "tag": "0000_good_serpent_society",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754409962860,
+      "tag": "0001_dusty_newton_destine",
+      "breakpoints": true
     }
   ]
 }

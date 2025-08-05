@@ -1,0 +1,1 @@
+ALTER TABLE "score" RENAME COLUMN "initials" TO "name";
