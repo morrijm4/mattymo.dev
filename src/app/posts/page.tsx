@@ -13,7 +13,7 @@ export default async function Posts() {
                 frontMatter: {
                     author: 'Matthew Morrison',
                     title: 'Snake',
-                    date: '2025-08-04T21:49:20.330Z',
+                    date: '2025-05-04T21:49:20.330Z',
                     description: 'Play the game Snake!',
                 }
             }} />
