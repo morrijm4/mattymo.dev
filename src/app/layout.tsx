@@ -9,6 +9,7 @@ import { Roboto_Mono } from 'next/font/google';
 import { RSS } from './icons/rss';
 import { GitHub } from './icons/github';
 import { Linkedin } from './icons/linkedin-svgrepo-com';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
     title: 'mattymo.dev',
@@ -25,6 +26,7 @@ export default async function RootLayout({ children }: PropsWithChildren) {
         <html lang="en" className={roboto.className + ' dark'} style={{ colorScheme: 'dark' }}>
             <Head backgroundColor={{ dark: '#24273a', light: '#eff1f5' }} />
             <body>
+                <SpeedInsights />
                 <Layout>
                     <Navbar pageMap={pageMap}>
                         <ThemeSwitch />
