@@ -36,7 +36,7 @@ type SnakeProps = {
 export function Snake({ onSubmitScore, ss, dispatch, highScore }: SnakeProps) {
     const ssRef = useLatest(ss);
     const [minimumDailyScore] = useLocalStorage('minimum-daily-score');
-    const canSubmitScore = minimumDailyScore == null ? false : ss.score > Number(minimumDailyScore)
+    const canSubmitScore = minimumDailyScore == null || ss.score < 1 ? false : ss.score > Number(minimumDailyScore)
 
     useKeyDown(useCallback((event) => {
         for (const [direction, keys] of keyMap) {

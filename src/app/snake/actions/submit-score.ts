@@ -9,8 +9,8 @@ import { db } from "@/db/client";
 const MAX_SCORE = DEFAULT_COLUMN_SIZE * DEFAULT_ROW_SIZE;
 
 export async function submitScore(score: number, formData: FormData): Promise<number> {
-    if (score > MAX_SCORE) {
-        console.error('score greater than max', score);
+    if (score > MAX_SCORE || score < 1) {
+        console.error('invalid score', score);
         notFound();
     }
 
