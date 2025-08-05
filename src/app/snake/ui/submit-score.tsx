@@ -4,7 +4,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import type { SnakeState } from "../snake-state";
 import { Button } from "@/components/ui/button";
 import { REGEXP_ONLY_CHARS } from 'input-otp';
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { submitScore } from "../actions/submit-score";
 import { useLocalStorage } from "../hooks/use-local-storage";
 
@@ -17,7 +17,7 @@ export const NAME_LENGTH = 3;
 
 export function SubmitScore({ ss, onBack }: SubmitScoreProps) {
     const [name, setName] = useLocalStorage('name');
-    const [, action, isPending] = useActionState(submitScore, ss.score);
+    const [loading, setLoading] = useState(false);
 
     return (
         <>
@@ -33,7 +33,17 @@ export function SubmitScore({ ss, onBack }: SubmitScoreProps) {
                     </button>
                 )}
             </div>
-            <form className="flex flex-col gap-4 items-start" action={action}>
+            <form className="flex flex-col gap-4 items-start" onSubmit={async (event) => {
+                event.preventDefault();
+                try {
+                    setLoading(true);
+                    await submitScore(ss.score, new FormData(event.currentTarget));
+                } catch {
+                    setLoading(false);
+                } finally {
+                    window.location.reload();
+                }
+            }}>
                 <InputOTP
                     autoComplete="off"
                     name="name"
@@ -51,7 +61,7 @@ export function SubmitScore({ ss, onBack }: SubmitScoreProps) {
                     </InputOTPGroup>
                 </InputOTP>
                 <Button
-                    disabled={isPending || name?.length !== NAME_LENGTH}
+                    disabled={loading || name?.length !== NAME_LENGTH}
                     type="submit"
                     variant="outline">
                     Submit

@@ -1,8 +1,11 @@
-import dayjs from 'dayjs';
 import { Table, Tabs } from 'nextra/components';
-import { getScores, getScoresBetween } from '../queries/get-scores';
+import {
+    getScores,
+    getScoresBetween,
+} from '../queries/get-scores';
 import { db } from '@/db/client';
-import { SaveMinimumDailyScore } from './save-minimum-daily-score';
+import { createDateRange } from '@/lib/create-date-range';
+import { rank } from '@/lib/rank';
 
 export async function Leaderboards() {
     const [daily, weekly, monthly, allTime] = await Promise.all([
@@ -14,7 +17,6 @@ export async function Leaderboards() {
 
     return (
         <>
-            <SaveMinimumDailyScore score={daily.length < rank.length ? 0 : daily.at(-1)?.score ?? 0} />
             <h1 className='mt-16'>Leaderboard</h1>
             <Tabs items={['Daily', 'Weekly', 'Monthly', 'All Time']}>
                 <Leaderboard rows={daily} />
@@ -35,7 +37,6 @@ type LeaderboardProps = {
     rows: Row[];
 };
 
-export const rank = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
 const DEFAULT = {};
 
 function Leaderboard({ rows }: LeaderboardProps) {
@@ -65,11 +66,4 @@ function Leaderboard({ rows }: LeaderboardProps) {
             </Table>
         </Tabs.Tab>
     );
-}
-
-function createDateRange(unit: dayjs.OpUnitType) {
-    return {
-        start: dayjs().startOf(unit).toDate(),
-        end: dayjs().endOf(unit).toDate(),
-    };
 }

@@ -1,7 +1,7 @@
 import { desc, between, asc } from "drizzle-orm";
 import { NeonHttpDatabase } from "drizzle-orm/neon-http";
 import { scoreTable } from "@/db/schema/score";
-import { rank } from "../ui/leaderboard";
+import { rank } from "@/lib/rank";
 
 interface GetScoresOptions {
     limit?: number;
@@ -44,4 +44,3 @@ export async function getScoresBetween(
         .orderBy(desc(scoreTable.score), asc(scoreTable.createdAt))
         .limit(limit);
 }
-

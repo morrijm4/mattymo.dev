@@ -5,6 +5,8 @@ import { useKeyDown } from '../hooks/use-key-down';
 import type { Direction } from '../point';
 import { SnakeState } from '../snake-state';
 import { SmallSpinner } from './spinner';
+import { useScores } from '../hooks/use-scores';
+import { rank } from '@/lib/rank';
 import { useLocalStorage } from '../hooks/use-local-storage';
 
 const upKeys = ['ArrowUp', 'w', 'k'];
@@ -29,14 +31,21 @@ export type SnakeEvent = {
 type SnakeProps = {
     ss: SnakeState;
     dispatch: ActionDispatch<[event: SnakeEvent]>
-    highScore?: string;
     onSubmitScore: () => void;
 }
 
-export function Snake({ onSubmitScore, ss, dispatch, highScore }: SnakeProps) {
+export function Snake({ onSubmitScore, ss, dispatch }: SnakeProps) {
     const ssRef = useLatest(ss);
-    const [minimumDailyScore] = useLocalStorage('minimum-daily-score');
-    const canSubmitScore = minimumDailyScore == null || ss.score < 1 ? false : ss.score > Number(minimumDailyScore)
+
+    const [highScore, setHighScore] = useLocalStorage('high-score');
+
+    ss.onGameOver = ({ score }) => {
+        if (score > Number(highScore)) setHighScore(score.toString());
+    }
+
+    const { scores } = useScores('day');
+    const lowestDailyScore = scores?.at(-1)?.score ?? 0;
+    const canSubmitScore = scores != null && (scores.length < rank.length || (ss.score > 0 && ss.score > lowestDailyScore));
 
     useKeyDown(useCallback((event) => {
         for (const [direction, keys] of keyMap) {
