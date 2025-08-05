@@ -1,2 +1,16 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Remove padding-inline-start from the first cell */
+@media (max-width: 48rem) {
+
+    thead th:first-child,
+    tbody td:first-child {
+        padding-inline-start: 1rem;
+    }
+
+    thead th:last-child,
+    tbody td:last-child {
+        padding-inline-end: 1rem;
+    }
+}

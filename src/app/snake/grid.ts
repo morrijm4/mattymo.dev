@@ -6,13 +6,19 @@ export interface GridOptions {
     cols?: number;
 };
 
+export const DEFAULT_ROW_SIZE = 13;
+export const DEFAULT_COLUMN_SIZE = 13;
+
 export class Grid {
     boxes: Box[][];
 
     rows: number;
     cols: number;
 
-    constructor({ rows = 13, cols = 13 }: GridOptions = {}) {
+    constructor({
+        rows = DEFAULT_ROW_SIZE,
+        cols = DEFAULT_COLUMN_SIZE,
+    }: GridOptions = {}) {
         this.rows = rows;
         this.cols = cols;
 

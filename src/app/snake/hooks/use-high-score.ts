@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const key = 'high-score';
-
-export function useHighScore() {
-    const [highScore, setHighScore] = useState(0);
+export function useLocalStorage(key: string, initialValue?: string) {
+    const [value, setValue] = useState(initialValue);
+    const ref = useRef(initialValue);
 
     useEffect(() => {
-        setHighScore(Number(window.localStorage.getItem(key)));
-    }, [])
+        setValue(window.localStorage.getItem(key) ?? ref.current);
+    }, [key])
 
-    return [highScore, useCallback((score: number) => {
-        window.localStorage.setItem(key, score.toString());
-        setHighScore(score);
-    }, [])] as const;
+    return [value, useCallback((val: string) => {
+        window.localStorage.setItem(key, val);
+        setValue(val);
+    }, [key])] as const;
 }

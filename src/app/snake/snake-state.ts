@@ -8,7 +8,9 @@ export interface SnakeOptions {
     score?: number;
     gameOver?: boolean;
     direction?: Direction;
-    setHighScore?: (score: number) => void;
+
+    // Event handlers
+    onGameOver?: (ss: SnakeState) => void;
 };
 
 export class SnakeState {
@@ -21,7 +23,8 @@ export class SnakeState {
     gameOver: boolean;
     direction: Direction | undefined;
 
-    setHighScore?: (score: number) => void;
+    // Event handlers
+    onGameOver?: (ss: SnakeState) => void;
 
     constructor({
         grid = new Grid(),
@@ -30,7 +33,9 @@ export class SnakeState {
         score = 0,
         gameOver = false,
         direction,
-        setHighScore,
+
+        // Event handlers
+        onGameOver,
     }: SnakeOptions = {}) {
         this.grid = grid;
         this.food = food;
@@ -38,7 +43,9 @@ export class SnakeState {
         this.score = score;
         this.gameOver = gameOver;
         this.direction = direction;
-        this.setHighScore = setHighScore;
+
+        // Event handlers
+        this.onGameOver = onGameOver;
     }
 
     init(): SnakeState {
@@ -87,7 +94,7 @@ export class SnakeState {
 
         if (!this.grid.includes(next) || this.snake.some((point) => point.equals(next))) {
             this.gameOver = true;
-            this.setHighScore?.(this.score);
+            this.onGameOver?.(this);
             return this;
         }
 

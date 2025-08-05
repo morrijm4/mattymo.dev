@@ -6,3 +6,5 @@ export const scoreTable = pgTable('score', {
     score: integer().notNull(),
     createdAt: timestamp().defaultNow().notNull(),
 });
+
+export type InsertScore = typeof scoreTable.$inferInsert;
