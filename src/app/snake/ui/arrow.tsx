@@ -1,6 +1,6 @@
 import type { ActionDispatch } from 'react';
 import type { Direction } from '../point';
-import type { SnakeEvent } from '../page';
+import type { SnakeEvent } from '../ui/snake';
 import {
     ArrowUp,
     ArrowDown,
