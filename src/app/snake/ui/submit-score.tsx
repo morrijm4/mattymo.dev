@@ -47,6 +47,7 @@ export function SubmitScore({ ss, onBack }: SubmitScoreProps) {
                 <InputOTP
                     autoComplete="off"
                     name="name"
+                    type="text"
                     value={name}
                     onChange={(name) => setName(name.toUpperCase())}
                     maxLength={NAME_LENGTH}
