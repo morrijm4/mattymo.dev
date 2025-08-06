@@ -1,6 +1,5 @@
 'use client';
 
-import { useLocalStorage } from '../hooks/use-local-storage';
 import { SnakeState } from '../snake-state';
 import { Snake, type SnakeEvent } from './snake';
 import { useReducer, useState } from "react";
@@ -18,13 +17,8 @@ function reducer(ss: SnakeState, event: SnakeEvent): SnakeState {
 type Screen = 'submit-score' | 'snake';
 
 export function ScreenManager() {
-    const [screen, setScreen] = useState<Screen>('snake');
-    const [highScore, setHighScore] = useLocalStorage('high-score');
     const [ss, dispatch] = useReducer(reducer, new SnakeState());
-
-    ss.onGameOver = ({ score }) => {
-        if (score > Number(highScore)) setHighScore(score.toString());
-    }
+    const [screen, setScreen] = useState<Screen>('snake');
 
     switch (screen) {
         case 'snake':
@@ -32,7 +26,6 @@ export function ScreenManager() {
                 onSubmitScore={() => setScreen('submit-score')}
                 ss={ss}
                 dispatch={dispatch}
-                highScore={highScore}
             />
         case 'submit-score':
             return <SubmitScore ss={ss} onBack={() => setScreen('snake')} />

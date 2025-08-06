@@ -4,7 +4,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import type { SnakeState } from "../snake-state";
 import { Button } from "@/components/ui/button";
 import { REGEXP_ONLY_CHARS } from 'input-otp';
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { submitScore } from "../actions/submit-score";
 import { useLocalStorage } from "../hooks/use-local-storage";
 
