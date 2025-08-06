@@ -48,6 +48,7 @@ export function SubmitScore({ ss, onBack }: SubmitScoreProps) {
                     autoComplete="off"
                     name="name"
                     type="text"
+                    inputMode="text"
                     value={name}
                     onChange={(name) => setName(name.toUpperCase())}
                     maxLength={NAME_LENGTH}
