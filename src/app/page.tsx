@@ -13,7 +13,7 @@ export default function Home() {
             <p>
             </p>
             <p>
-                <a href="mailto:j.matthew.morrison1@gmail.com">j.matthew.morrison1@gmail.com</a>
+                Feel free to contact me at <a href="mailto:matthew@mattymo.dev">matthew@mattymo.dev</a>.
             </p>
             <br />
             <br />
