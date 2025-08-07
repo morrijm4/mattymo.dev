@@ -18,11 +18,11 @@ export async function Leaderboards() {
     return (
         <>
             <h1 className='mt-16'>Leaderboard</h1>
-            <Tabs items={['Daily', 'Weekly', 'Monthly', 'All Time']}>
-                <Leaderboard rows={daily} />
-                <Leaderboard rows={weekly} />
-                <Leaderboard rows={monthly} />
+            <Tabs items={['All Time', 'Monthly', 'Weekly', 'Daily']}>
                 <Leaderboard rows={allTime} />
+                <Leaderboard rows={monthly} />
+                <Leaderboard rows={weekly} />
+                <Leaderboard rows={daily} />
             </Tabs>
         </>
     );
