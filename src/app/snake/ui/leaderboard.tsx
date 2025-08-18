@@ -1,3 +1,4 @@
+import { connection } from 'next/server';
 import { Table, Tabs } from 'nextra/components';
 import {
     getScores,
@@ -8,6 +9,8 @@ import { createDateRange } from '@/lib/create-date-range';
 import { rank } from '@/lib/rank';
 
 export async function Leaderboards() {
+    await connection();
+
     const [daily, weekly, monthly, allTime] = await Promise.all([
         getScoresBetween(db, createDateRange('day')),
         getScoresBetween(db, createDateRange('week')),
