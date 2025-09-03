@@ -24,7 +24,9 @@ const pageMap = await getPageMap();
 export default async function RootLayout({ children }: PropsWithChildren) {
     return (
         <html lang="en" className={roboto.className + ' dark'} style={{ colorScheme: 'dark' }}>
-            <Head backgroundColor={{ dark: '#24273a', light: '#eff1f5' }} />
+            <Head backgroundColor={{ dark: '#24273a', light: '#eff1f5' }} >
+                <link rel='apple-touch-icon' href='/apple-touch-icon.png' />
+            </Head>
             <body>
                 <SpeedInsights />
                 <Layout>
