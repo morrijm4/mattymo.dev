@@ -3,13 +3,14 @@ import './globals.css'
 import type { Metadata } from 'next';
 import { Head } from 'nextra/components';
 import { Footer, Layout, Navbar, ThemeSwitch } from 'nextra-theme-blog';
-import type { PropsWithChildren } from 'react';
+import { type PropsWithChildren, Suspense } from 'react';
 import { getPageMap } from 'nextra/page-map';
 import { Roboto_Mono } from 'next/font/google';
 import { RSS } from './icons/rss';
 import { GitHub } from './icons/github';
 import { Linkedin } from './icons/linkedin-svgrepo-com';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Copyright } from '@/components/ui/copyright';
 
 export const metadata: Metadata = {
     title: 'mattymo.dev',
@@ -43,7 +44,9 @@ export default async function RootLayout({ children }: PropsWithChildren) {
                                 >
                                     CC BY-NC 4.0
                                 </abbr>{' '}
-                                {new Date().getFullYear()} © Matthew Morrison.
+                                <Suspense>
+                                    <Copyright />
+                                </Suspense>
                             </div>
                             <div className="flex space-x-2 items-center">
                                 <a href='https://github.com/morrijm4/'>

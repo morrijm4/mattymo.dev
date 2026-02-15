@@ -23,7 +23,7 @@ export default function Home() {
             <h3>Asurion</h3>
             <p>May 2022 - Jul 2025</p>
             <ul>
-                <li>Software Engineer 3 (Tech lead)</li>
+                <li>Software Engineer 3, Tech lead</li>
                 <li>Software Engineer 2</li>
                 <li>Software Engineer 1</li>
                 <li>Software Engineer Intern</li>
