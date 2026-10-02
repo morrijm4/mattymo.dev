@@ -7,18 +7,20 @@ category: Programming
 author: Matthew Morrison
 ---
 
-I recently attempted the One Billion Row Challenge (1BRC) using the Zig
-programming language. I am new to Zig so, this challenge was a way for me to get
-my feet wet with this language. Also, this challenge has peaked my interest in
-the past and wanted to give it a shot! I just finished grad school where I took
-Modern Computer Architecture and, I wanted to test my new found knowledge.
+I recently attempted the [One Billion Row Challenge](https://1brc.dev/) (1BRC)
+using the [Zig](https://ziglang.org/) programming language. I am new to Zig so,
+this challenge was a way for me to get my feet wet with. Also, I've heard about
+it in the past and wanted to give it a shot! I just finished grad school where I
+took Modern Computer Architecture and, I wanted to test my new found knowledge.
 
-The provided Java baseline implementation executed in 141 seconds on my 12 core
-M4 MacBook Pro, and optimizing my program, the final execution time was **1.14**
-seconds. That is a 124x speedup! Leveraging Apple's fantastic profiler,
-Instruments, I was able to identify bottlenecks and make full use of my
-processor! From this experience, I was able to take away invaluable lessons
-about performance engineering.
+The provided Java baseline
+[implementation](https://github.com/gunnarmorling/1brc/blob/main/src/main/java/dev/morling/onebrc/CalculateAverage_baseline.java)
+executed in 141 seconds on my 12 core M4 MacBook Pro, and optimizing my program,
+the final execution time was **1.14** seconds. That is a 124x speedup!
+Leveraging Apple's fantastic profiler,
+[Instruments](https://developer.apple.com/tutorials/instruments), I was able to
+identify bottlenecks and make full use of my processor! From this experience, I
+was able to take away invaluable lessons about performance engineering.
 
 As a disclaimer, I used AI chat bots for assistance for learning Zig. I have
 provided links to my threads in the appendix. However, all code for the
@@ -33,12 +35,12 @@ including the code for each iteration by checking out the branches prefixed with
 
 # What is the One Billion Row Challenge?
 
-1BRC started as competition in the Java community that ran in the month of
-January 2023 to see who can create the fastest program that could compute the
-minimum, maximum, and average temperature per weather station based on 1 billion
-data points. This translates to roughly 13GB of data! The challenge has hence
-spread across other language communities and continues as a fun challenge
-recreational programmers.
+1BRC started as [competition](https://github.com/gunnarmorling/1brc#results) in
+the Java community that ran in the month of January 2023 to see who can create
+the fastest program that could compute the minimum, maximum, and average
+temperature per weather station based on 1 billion data points. This translates
+to roughly 13GB of data! The challenge has hence spread across other language
+communities and continues as a fun challenge recreational programmers.
 
 Here is an example of how the data is structured.
 
@@ -59,8 +61,8 @@ full list of rules [here](https://1brc.dev/#rules-and-limits).
 
 # Amdahl's Law
 
-My methodology for this challenge was influenced by Amdahl's Law. The law
-states...
+My methodology for this challenge was influenced by [Amdahl's
+Law](https://en.wikipedia.org/wiki/Amdahl%27s_law). The law states...
 
 > the overall performance improvement gained by optimizing a single part of a
 > system is limited by the fraction of time that the improved part is actually
@@ -79,8 +81,8 @@ program's execution then optimizing that section of code.
 I utilized Apple's profiler that ships with XCode, Instruments, as my way to
 measure the proportion of execution time for each function. By sampling a
 program's stack trace every 1 millisecond it can provide accurate estimations.
-Combined with Zig's ability to output DWARF compliant debug symbols, this was a
-fantastic user experience.
+Combined with Zig's ability to output [DWARF](https://dwarfstd.org/) compliant
+debug symbols, this was a fantastic user experience.
 
 # Optimizations
 
@@ -146,9 +148,10 @@ performance impact.
 - In the final program `findScalarPos` continues to be a large bottleneck and
   over the course of this challenge I took a stab at implementing my own. I
   tried to combine SIMD instructions and loop unrolling but, that drove up my
-  processor backend bottleneck counters way up and slowed down execution time.
-  I concluded the Zig standard library has one hellava implementation so
-  shout outs to them!
+  processor backend bottleneck counters way up and slowed down execution time. I
+  concluded the Zig standard library has one hellava
+  [implementation](https://codeberg.org/ziglang/zig/src/commit/655bee8c75c19b82b8f2c730feec857e85e4991b/lib/std/mem.zig#L1309)
+  so shout outs to them!
 
 - Before I went with a map-reduce implementation for the multi-threaded
   approach. I tried using one hash map with a mutex however, this resulted in
@@ -176,8 +179,9 @@ reader, hash map, and temperature parser.
 
 If you know the constraints of you application, then you can allocate all of the
 memory you need up front. This removes memory allocation from your hot path to
-speed up execution. An example of this in practice can be seen with TigerBeetle
-and their TigerStyle philosophy.
+speed up execution. An example of this in practice can be seen with
+[TigerBeetle](https://tigerbeetle.com/) and their
+[TigerStyle](https://tigerstyle.dev/) philosophy.
 
 ## Measure first, then optimize.
 
