@@ -1,7 +1,6 @@
 ---
 title: One Billion Row Challenge
-description: My attempt at the one billion row challenge using the Zig
-programming language.
+description: My attempt at the one billion row challenge using the Zig programming language.
 date: 2026-09-26T20:16:41.046Z
 tag: 1brc, zig, optimization, performance
 category: Programming
