@@ -40,12 +40,6 @@ data points. This translates to roughly 13GB of data! The challenge has hence
 spread across other language communities and continues as a fun challenge
 recreational programmers.
 
-Here are the important constraints specified by the challenge.
-
-- At most there are 10,000 unique weather stations.
-- A station name is a UTF-8 string with a max length of 100 bytes.
-- Temperatures range between -99.0 to 99.0 (inclusive).
-
 Here is an example of how the data is structured.
 
 ```
@@ -54,6 +48,14 @@ Bulawayo;8.9
 Palembang;38.8
 Hamburg;-34.2
 ```
+
+These are the important constraints specified by the challenge. You can find the
+full list of rules [here](https://1brc.dev/#rules-and-limits).
+
+- At most there are 10,000 unique weather stations.
+- A station name is a UTF-8 string with a max length of 100 bytes.
+- Temperatures range between -99.0 to 99.0 (inclusive).
+
 
 # Amdahl's Law
 
@@ -66,11 +68,9 @@ states...
 
 Formally it is described as.
 
-```math
-S = 1 / (1 - p) + (p / s)
-```
+*S* = 1 / (1 - *p*) + (*p* / *s*)
 
-Where `S` is overall speedup, `p` is a proportion of a program, and `s` is the
+Where *S* is overall speedup, *p* is a proportion of a program, and *s* is the
 speedup of that proportion.
 
 Therefore, for each iteration I first identified the largest proportion of my
@@ -136,7 +136,10 @@ performance impact.
 6. Finally, I implemented multi-threading. I used a map-reduce like technique
    where I split my input evenly by row and each worker had their own hash map
    to populated. After all workers finished then the maps were reduced into the
-   final result.
+   final result. I added Zig's monotonic clock (`std.Io.Clock.awake.now(io)`) to
+   measure the proportion of execution for parsing and populating the maps.
+   However, the beginning and end are nanoseconds of execution time so roughly
+   speaking this stage accounts for 99.99% of execution time.
 
 # Unsuccessful Optimizations
 
@@ -190,14 +193,14 @@ section of the code remain basically the same as the baseline implementation.
 
 Does Amdhal's Law match up to empirical data? Here are the results.
 
-| N | Optimization              | Execution Proportion (*p*) | Proportion Speedup (*s*) | Theoretical Speedup (*S*) | Actual Speedup (*S'*) |
-|---|---------------------------|----------------------------|--------------------------|---------------------------|-----------------------|
-| 1 | Find semicolon in reverse | 33%                        | 8.951                    | 1.529                     | 1.460                 |
-| 2 | Static allocation         |                            |                          |                           |                       |
-| 3 | Custom temperature parser |                            |                          |                           |                       |
-| 4 | Custom buffered reader    |                            |                          |                           |                       |
-| 5 | Custom hash map           |                            |                          |                           |                       |
-| 6 | Multi-threaded            
+| N | Optimization              | Theoretical Speedup (*S*) | Actual Speedup (*S'*) |
+|---|---------------------------|---------------------------|-----------------------|
+| 1 | Find semicolon in reverse | 1.529                     | 1.460                 |
+| 2 | Static allocation         | 1.657                     | 1.195                 |
+| 3 | Custom temperature parser | 1.485                     | 1.213                 |
+| 4 | Custom buffered reader    | -                         | 1.367                 |
+| 5 | Custom hash map           | 1.665                     | 1.044                 |
+| 6 | Multi-threaded            | -                         | 8.138                 |
 
 # Conclusion
 
