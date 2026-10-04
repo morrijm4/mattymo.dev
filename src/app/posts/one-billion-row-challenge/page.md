@@ -100,8 +100,8 @@ a slice of each line in the file then, linearly searching for a semicolon. This
 call to `findScalar` accounted for 33.0% of the execution time.
 
 ```zig
-    while (try reader.takeDelimiter('\n')) |line| {
-        const dim = std.mem.findScalar(u8, line, ';').?;
+while (try reader.takeDelimiter('\n')) |line| {
+    const dim = std.mem.findScalar(u8, line, ';').?;
 ```
 
 By switching to searching from the end of the slice it dropped the proportion of
@@ -109,14 +109,14 @@ execution down to 5.5%. Additionally, we can start 3 bytes back because of the
 constraints of our data.
 
 ```zig
-    while (try reader.takeDelimiter('\n')) |line| {
-        // Max temperature string lengh is 5
-        // Min temperature string lengh is 3
-        // Vientiane;-26.8
-        //            ^
-        // Palembang;6.8
-        //          ^
-        const dim = findScalarLastPos(u8, line, line.len - 3, ';').?;
+while (try reader.takeDelimiter('\n')) |line| {
+    // Max temperature string lengh is 5
+    // Min temperature string lengh is 3
+    // Vientiane;-26.8
+    //            ^
+    // Palembang;6.8
+    //          ^
+    const dim = findScalarLastPos(u8, line, line.len - 3, ';').?;
 ```
 
 That dropped our execution time from 28 to 19 seconds.
@@ -130,7 +130,7 @@ to support 10,000 entries. This dropped `getOrPut` to 20.4% execution time
 and `isTombstone` to 0.4%! Dropping execution time to 16 seconds.
 
 ```zig
-    try map.ensureTotalCapacity(gpa, 10_000);
+try map.ensureTotalCapacity(gpa, 10_000);
 ```
 
 ## Custom temperature parser + use integers
@@ -141,7 +141,6 @@ use integers before converting them back to floats. This drop the proportion
 to 3.6% and execution time to 13 seconds.
 
 ```zig
-
 fn parseTemp(temp: []const u8) i16 {
     var result: i16 = 0;
     var i = temp.len - 1;
@@ -185,20 +184,20 @@ where it gets drowned out. However, this dropped execution time down to 9.7
 seconds.
 
 ```zig
-    var off: usize = 0;
-    while (try pread(file, &buf, buf.len, off)) |n| {
-        var i: usize = 0;
-        while (i < n) {
-            const newline = std.mem.findScalarPos(u8, &buf, i, '\n') orelse break;
+var off: usize = 0;
+while (try pread(file, &buf, buf.len, off)) |n| {
+    var i: usize = 0;
+    while (i < n) {
+        const newline = std.mem.findScalarPos(u8, &buf, i, '\n') orelse break;
 
-            // ...
+        // ...
 
-            i = newline + 1;
+        i = newline + 1;
 
-            // ...
-        }
-        off += i;
+        // ...
     }
+    off += i;
+}
 ```
 
 ## Custom hash map
@@ -214,15 +213,15 @@ The guts of the implementation were in the `get` function (which acts like
 `getOrPut`).
 
 ```zig
-    fn get(self: Table, key: []const u8) *Entry {
-        const hash = std.hash.Wyhash.hash(42, key);
-        var i = hash % self.table.len;
-        while (!self.table[i].isEmpty()) : (i = (i + 1) % self.table.len) {
-            if (self.table[i].hash == hash) return &self.table[i];
-        }
-        self.table[i].hash = hash;
-        return &self.table[i];
+fn get(self: Table, key: []const u8) *Entry {
+    const hash = std.hash.Wyhash.hash(42, key);
+    var i = hash % self.table.len;
+    while (!self.table[i].isEmpty()) : (i = (i + 1) % self.table.len) {
+        if (self.table[i].hash == hash) return &self.table[i];
     }
+    self.table[i].hash = hash;
+    return &self.table[i];
+}
 ```
 
 ## Unleash the beast
@@ -238,11 +237,11 @@ stage accounts for 99.99% of execution time.
 I got to take advantage of the new Zig 0.16 `Io` interface which was very clean!
 
 ```zig
-    var group: Io.Group = .init;
-    for (intervals, tables) |int, table| {
-        group.async(io, interval.process, .{ gpa, file, table, int });
-    }
-    try group.await(io);
+var group: Io.Group = .init;
+for (intervals, tables) |int, table| {
+    group.async(io, interval.process, .{ gpa, file, table, int });
+}
+try group.await(io);
 ```
 
 # Unsuccessful Optimizations
