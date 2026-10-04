@@ -16,11 +16,11 @@ challenge.
 # What is the One Billion Row Challenge?
 
 [1BRC](https://github.com/gunnarmorling/1brc) originated in January 2023 as a
-casual programming challenge in the data processing community to see how much
-performance they could squeeze out of Java. The task is to compute the minimum,
-maximum, and average temperature for each weather station then, sort by station
-name and print to stdout the results. The 1 billion row synthetic dataset
-equates to roughly 13GB of data. The challenge has hence spread across other
+casual programming challenge in the data processing community to test the
+performance limits of Java. The task is given a synthetic dataset with 1 billion
+rows each consisting of the name of a weather station and a temperature, compute
+the minimum, maximum, and mean temperature for each station. Then, print the
+results to stdout in alphabetical order. The challenge hence spread across other
 language communities and continues as a fun activity for recreational
 programmers.
 
@@ -33,9 +33,9 @@ Palembang;38.8
 Hamburg;-34.2
 ```
 
-The challenge laid out a list of rules and constraints about the dataset. For
-this blog post, here are some important ones. You can find the full list of
-rules [here](https://1brc.dev/#rules-and-limits).
+The challenge laid out a list of rules and constraints about the inputs. For
+this blog post, here are the ones with most relevance. You can find the full
+list of rules [here](https://1brc.dev/#rules-and-limits).
 
 - There are at most 10,000 unique weather stations.
 - A station name has a max length of 100 bytes.
@@ -62,13 +62,13 @@ give you the greatest performance improvements.
 
 To identify choke points, I utilized Apple's profiler that ships with XCode,
 [Instruments](https://developer.apple.com/tutorials/instruments). It samples a
-program's stack trace every 1 millisecond to provide estimates on the time spend
-for each function. This is made possible because Zig emits
-[DWARF](https://dwarfstd.org/) compliant debug symbols so the tool can map back
-to the source function names. Not to mention it also has a beautiful UI.
-So big thanks to the Apple and Zig teams 👏.
+program's stack trace every 1 millisecond to provide estimates on the total time
+spent in each function. This is made possible because Zig emits
+[DWARF](https://dwarfstd.org/) compliant debug symbols so Instruments can map
+back to the source function names. Not to mention it also has a beautiful UI. So
+big thanks to the Apple and Zig teams 👏.
 
-INSERT IMAGE HERE
+![Instruments](/Instruments.png)
 
 # Optimizations
 
