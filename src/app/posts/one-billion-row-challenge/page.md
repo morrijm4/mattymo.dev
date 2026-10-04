@@ -73,8 +73,9 @@ big thanks to the Apple and Zig teams 👏.
 # Optimizations
 
 Below is each optimization I added chronologically and its performance impact. I
-used hyperfine as my tool to measure execution time. It was configured to have 3
-warm up runs then 10 measured executions that were averaged together.
+used [hyperfine](https://github.com/sharkdp/hyperfine) as the tool to measure
+execution time. It was configured to have 3 warm up runs then 10 measured
+executions which were averaged together.
 
 | N | Optimization               | Execution Time (s) | Speedup |
 |---|----------------------------|--------------------|---------|
@@ -125,9 +126,11 @@ That dropped our execution time from 28 to 19 seconds.
 
 The next bottleneck was the `getOrPut` method on our hash map. In total it
 accounted for 32.7% of program execution. Drilling in further, an internal
-method, `isTombstone`, accounted for 13.7%. So, I preallocated the hash map
-to support 10,000 entries. This dropped `getOrPut` to 20.4% execution time
-and `isTombstone` to 0.4%! Dropping execution time to 16 seconds.
+method, `isTombstone`, accounted for 13.7%. After perusing through the
+implementation a bit, I gathered just enough context to make an educated guess
+`isTombstone` is part of resizing the internal buffer. So, I preallocated the
+hash map to support 10,000 entries. This dropped `getOrPut` to 20.4% execution
+time and `isTombstone` to 0.4%! Dropping execution time to 16 seconds.
 
 ```zig
 try map.ensureTotalCapacity(gpa, 10_000);
@@ -135,10 +138,10 @@ try map.ensureTotalCapacity(gpa, 10_000);
 
 ## Custom temperature parser + use integers
 
-Now `parseFloat` became the bottleneck with a execution proportion of 31.3%. I
+Now, `parseFloat` became the bottleneck with a execution proportion of 31.3%. I
 wrote a float parser tailored to our temperature range while also switching to
-use integers before converting them back to floats. This drop the proportion
-to 3.6% and execution time to 13 seconds.
+use integers before converting them back to floats. This drop the proportion of
+time spent parsing temperatures down to 3.6% and execution time to 13 seconds.
 
 ```zig
 fn parseTemp(temp: []const u8) i16 {
@@ -203,11 +206,11 @@ while (try pread(file, &buf, buf.len, off)) |n| {
 ## Custom hash map
 
 Then it was back to the hash map. It continued to take up 32.7% of the program.
-Given we had an upper bound on entries I reasoned a custom implementation would
-need less code than a generic one provided by the standard library. I used the
-same hash function as the standard library `StringHashMap`, `Wyhash`, and used
-linear probing. This drop the proportion to 19.1% and execution time to 9.3
-seconds.
+Given we had an upper bound on weather stations I reasoned a custom
+implementation would need less code than a generic one provided by the standard
+library. I used the same hash function as the standard library `StringHashMap`,
+`Wyhash`, and used linear probing. This drop the proportion to 19.1% and
+execution time to 9.3 seconds.
 
 The guts of the implementation were in the `get` function (which acts like
 `getOrPut`).
@@ -226,13 +229,16 @@ fn get(self: Table, key: []const u8) *Entry {
 
 ## Unleash the beast
 
-Finally, I implemented multi-threading. I used a map-reduce like technique where
-I split my input evenly on newlines and each worker had their own hash map it
+Finally, I implemented multi-threading. I used a
+[MapReduce](https://en.wikipedia.org/wiki/MapReduce) like technique where I
+split my input evenly on newlines and each worker had their own hash map it
 populated. After all workers finished, the maps were reduced into the final
-result. I added Zig's monotonic clock (`std.Io.Clock.awake.now(io)`) to measure
-the proportion of execution for parsing and populating the maps. However, the
-beginning and end are nanoseconds of execution time so roughly speaking this
-stage accounts for 99.99% of execution time.
+result. In an attempt to measure the proportion of execution for parsing and
+populating the maps, I added Zig's monotonic clock
+(`std.Io.Clock.awake.now(io)`). However, the beginning and end are nanoseconds
+of execution time so roughly speaking this stage accounts for 99.99% of
+execution time and continues to be the bulk of the program after the added
+parallelism.
 
 ```zig
 var group: Io.Group = .init;
@@ -242,7 +248,7 @@ for (intervals, tables) |int, table| {
 try group.await(io);
 ```
 
-I got to take advantage of the new Zig 0.16 `Io` interface which was very clean!
+I was able to use the new Zig 0.16 `Io` interface which was very clean!
 
 # Unsuccessful Optimizations
 
@@ -254,19 +260,19 @@ to combine SIMD instructions and loop unrolling but, that drove up my processor
 backend bottleneck counters way up and slowed down execution time. I concluded
 the Zig standard library has one hellava
 [implementation](https://codeberg.org/ziglang/zig/src/commit/655bee8c75c19b82b8f2c730feec857e85e4991b/lib/std/mem.zig#L1309)
-so shout out to them!
+so, shout out to them!
 
 ## One shared hash map
 
-Before I went with a map-reduce implementation for the multi-threaded
+Before I went with a MapReduce implementation for the multi-threaded
 approach, I tried using one hash map with a mutex. However, this resulted in
 poor performance and it was also caused a lot bugs (skill issue).
 
 ## Different hashing functions
 
 I tried a _lot_ of different hashing functions. This is still one of the largest
-bottlenecks. However, Wyhash is really hard to beat and nothing I tried was
-faster.
+bottlenecks as well. However, Wyhash is really hard to beat and nothing I tried
+was faster.
 
 # Takeaways
 
@@ -287,9 +293,9 @@ speed up execution. An example of this in practice can be seen with
 
 ## Measure first, then optimize.
 
-When I initially started, I thought I would be bottleneck more by the disk.
-However, the syscalls to `pread` where only a sliver of the execution time and
-therefore I never touched it.
+When I initially started, I thought I'd be bottlenecked by the disk. However,
+the syscalls to [`pread`](https://man7.org/linux/man-pages/man2/pread.2.html)
+where only a sliver of the execution time and therefore I never touched it.
 
 Additionally, I thought there would be some need to optimize the final stage
 where the stations are sorted and the hash maps are reduced. However, those
@@ -297,10 +303,10 @@ section of the code remain basically the same as the baseline implementation.
 
 # Math For Nerds
 
-Now gripped with empirical data, I wondered how they compared to the
-theoretical speedup Amdhal's Law predicts. For optimizations where I could
-measure the proportion of execution time before and after here are the
-theoretical speedups compared to the actual results.
+Now gripped with empirical data, I wondered how they compared to the theoretical
+speedup Amdhal's Law predicts. For optimizations where I could measure the
+proportion of execution time before and after, here are the theoretical speedups
+compared to the actual results.
 
 | N | Optimization              | Theoretical Speedup (*S*) | Actual Speedup (*S'*) |
 |---|---------------------------|---------------------------|-----------------------|
@@ -309,9 +315,9 @@ theoretical speedups compared to the actual results.
 | 3 | Custom temperature parser | 1.485                     | 1.213                 |
 | 5 | Custom hash map           | 1.665                     | 1.044                 |
 
-It is clear Amdhal's law over-predicts speedup potential here. I am guessing the
-margin of error associated with the profiler sample rate has an impact on the
-gap. I am curious about the reader's thoughts on this discrepancy.
+It is clear Amdhal's law over-predicts speedup potential here. I reason the
+profiler sample rate has an impact on this gap. However, I am curious about the
+reader's thoughts on this discrepancy.
 
 # Conclusion
 
@@ -320,12 +326,12 @@ Morling](https://www.morling.dev/) for creating such a valuable learning
 experience and fostering a community of great performance engineers. There were
 times when it was hard, but thankfully I didn't give up and it was so satisfying
 to see the execution time drop. I am relatively new to performance engineering
-so, this was the perfect way to get my feet wet.
+but, I felt this was the perfect way to get my feet wet.
 
 Furthermore, Zig is an awesome programming language and I'm going to continue to
-invest in learning it. It is such a simple language but gives you so much power
-in how you can customize the build system, write expressive typing, and compute
-values at comptime. It has been such a joy to work with.
+invest in learning it. It is a simple language but, it also gives you so much
+power in how you can customize the build system, write expressive typing, and
+compute values at comptime. It has been such a joy to work with.
 
 You can find all the code [here](https://github.com/morrijm4/1brc-zig),
 including the code for each iteration by checking out the branches prefixed with
