@@ -11,18 +11,18 @@ I recently attempted the [One Billion Row Challenge](https://1brc.dev/) (1BRC)
 using the [Zig](https://ziglang.org/) programming language and was able to
 optimize my program to execute in **1.14** seconds. In this blog post I will
 discuss my methodology, the optimizations, and the takeaways I gleaned from this
-challenge. Thank you [Gunnar Morling](https://www.morling.dev/) for creating
-such a fun and valuable learning experience!
+challenge. 
 
 # What is the One Billion Row Challenge?
 
 [1BRC](https://github.com/gunnarmorling/1brc) originated in January 2023 as a
 casual programming challenge in the data processing community to see how much
 performance they could squeeze out of Java. The task is to compute the minimum,
-maximum, and average temperature for each weather station based on a synthetic
-dataset of 1 billion rows equating to roughly 13GB of data. The challenge has
-hence spread across other language communities and continues as a fun challenge
-recreational programmers.
+maximum, and average temperature for each weather station then, sort by station
+name and print to stdout the results. The 1 billion row synthetic dataset
+equates to roughly 13GB of data. The challenge has hence spread across other
+language communities and continues as a fun activity for recreational
+programmers.
 
 Below is a snippet taken from the dataset.
 
@@ -37,13 +37,13 @@ The challenge laid out a list of rules and constraints about the dataset. For
 this blog post, here are some important ones. You can find the full list of
 rules [here](https://1brc.dev/#rules-and-limits).
 
-- At most there are 10,000 unique weather stations.
+- There are at most 10,000 unique weather stations.
 - A station name has a max length of 100 bytes.
 - Temperatures range between -99.0 to 99.0 (inclusive).
 
 # Methodology
 
-My methodology for this inspired by [Amdahl's
+My methodology was inspired by [Amdahl's
 Law](https://en.wikipedia.org/wiki/Amdahl%27s_law). The law states...
 
 > the overall performance improvement gained by optimizing a single part of a
@@ -57,8 +57,8 @@ Formally it is described as.
 Where *S* is overall speedup, *p* is a proportion of a program execution, and
 *s* is the speedup of that proportion.
 
-What this translates to is optimizing the bottleneck of your system achieves the
-greatest performance improvements.
+This distills down to if you optimize the bottleneck of your system, it will
+give you the greatest performance improvements.
 
 To identify choke points, I utilized Apple's profiler that ships with XCode,
 [Instruments](https://developer.apple.com/tutorials/instruments). It samples a
@@ -68,9 +68,13 @@ for each function. This is made possible because Zig emits
 to the source function names. Not to mention it also has a beautiful UI.
 So big thanks to the Apple and Zig teams 👏.
 
+INSERT IMAGE HERE
+
 # Optimizations
 
-Below is each optimization I added chronologically and its performance impact.
+Below is each optimization I added chronologically and its performance impact. I
+used hyperfine as my tool to measure execution time. It was configured to have 3
+warm up runs then 10 measured executions that were averaged together.
 
 | N | Optimization               | Execution Time (s) | Speedup |
 |---|----------------------------|--------------------|---------|
@@ -86,13 +90,13 @@ Below is each optimization I added chronologically and its performance impact.
 ## Implement it in Zig!
 
 Just by implementing a simple solution with Zig and setting the flag
-`-Doptimize=ReleaseFast`, I was able to get a 5x speedup. Way to go Zig and LLVM
-teams!
+`-Doptimize=ReleaseFast`, I was able to get a 5x speedup from the provided Java
+baseline. Way to go Zig and LLVM teams!
 
 ## Finding the semicolon
 
-The naive Zig implementation parsed each station and temperature first by taking
-a slice for each line in the file then, linearly searching for a semicolon. This
+The initial implementation parsed each station and temperature first by taking
+a slice of each line in the file then, linearly searching for a semicolon. This
 call to `findScalar` accounted for 33.0% of the execution time.
 
 ```zig
@@ -131,10 +135,10 @@ and `isTombstone` to 0.4%! Dropping execution time to 16 seconds.
 
 ## Custom temperature parser + use integers
 
-Now `parseFloat` became the bottleneck with a proportion of 31.3% of execution
-time. I wrote a float parser tailored to our temperature range while also
-switched to using integers before converting them back to floats. This drop the
-proportion to 3.6% and execution time to 13 seconds.
+Now `parseFloat` became the bottleneck with a execution proportion of 31.3%. I
+wrote a float parser tailored to our temperature range while also switching to
+use integers before converting them back to floats. This drop the proportion
+to 3.6% and execution time to 13 seconds.
 
 ```zig
 
@@ -173,12 +177,12 @@ fn parseTemp(temp: []const u8) i16 {
 
 ## Custom buffered reader
 
-Next was the buffered reader, and this was the one I was dreading the most. It
-took me multiple implementation attempts but I finally landed on one that out
-performed the Zig standard library. The original buffered reader accounted for
-32.8% but measuring the new one was hard to do because it is now baked into the
-`main` function where it gets drowned out. However, this dropped execution time
-down to 9.7 seconds.
+Next was the buffered reader (I was dreading this the most). It took me multiple
+implementation attempts but I finally landed on one that out performed the Zig
+standard library. The original buffered reader accounted for 32.8% but measuring
+the new one was hard to do because it is now baked into the `main` function
+where it gets drowned out. However, this dropped execution time down to 9.7
+seconds.
 
 ```zig
     var off: usize = 0;
@@ -201,13 +205,12 @@ down to 9.7 seconds.
 
 Then it was back to the hash map. It continued to take up 32.7% of the program.
 Given we had an upper bound on entries I reasoned a custom implementation would
-need less code than a generic one provided by the standard library. I did not
-have to think about resizing arrays or implementing linked lists. I used the
+need less code than a generic one provided by the standard library. I used the
 same hash function as the standard library `StringHashMap`, `Wyhash`, and used
 linear probing. This drop the proportion to 19.1% and execution time to 9.3
 seconds.
 
-The guts of the implementation were in the `get` function (which is really a
+The guts of the implementation were in the `get` function (which acts like
 `getOrPut`).
 
 ```zig
@@ -224,15 +227,15 @@ The guts of the implementation were in the `get` function (which is really a
 
 ## Unleash the beast
 
-Finally, I implemented multi-threading. I used a map-reduce like technique
-where I split my input evenly by row and each worker had their own hash map
-to populated. After all workers finished then the maps were reduced into the
-final result. I added Zig's monotonic clock (`std.Io.Clock.awake.now(io)`) to
-measure the proportion of execution for parsing and populating the maps.
-However, the beginning and end are nanoseconds of execution time so roughly
-speaking this stage accounts for 99.99% of execution time.
+Finally, I implemented multi-threading. I used a map-reduce like technique where
+I split my input evenly on newlines and each worker had their own hash map it
+populated. After all workers finished, the maps were reduced into the final
+result. I added Zig's monotonic clock (`std.Io.Clock.awake.now(io)`) to measure
+the proportion of execution for parsing and populating the maps. However, the
+beginning and end are nanoseconds of execution time so roughly speaking this
+stage accounts for 99.99% of execution time.
 
-Got to take advantage of the new `Io` interface which was very clean!
+I got to take advantage of the new Zig 0.16 `Io` interface which was very clean!
 
 ```zig
     var group: Io.Group = .init;
@@ -246,11 +249,11 @@ Got to take advantage of the new `Io` interface which was very clean!
 
 ## Custom `findScalarPos`
 
-In the final program `findScalarPos` continues to be a large bottleneck and
-over the course of this challenge I took a stab at implementing my own. I
-tried to combine SIMD instructions and loop unrolling but, that drove up my
-processor backend bottleneck counters way up and slowed down execution time. I
-concluded the Zig standard library has one hellava
+In the final program, `findScalarPos` continues to be a large bottleneck and
+over the course of this challenge I took a stab at implementing my own. I tried
+to combine SIMD instructions and loop unrolling but, that drove up my processor
+backend bottleneck counters way up and slowed down execution time. I concluded
+the Zig standard library has one hellava
 [implementation](https://codeberg.org/ziglang/zig/src/commit/655bee8c75c19b82b8f2c730feec857e85e4991b/lib/std/mem.zig#L1309)
 so shout out to them!
 
@@ -259,6 +262,12 @@ so shout out to them!
 Before I went with a map-reduce implementation for the multi-threaded
 approach, I tried using one hash map with a mutex. However, this resulted in
 poor performance and it was also caused a lot bugs (skill issue).
+
+## Different hashing functions
+
+I tried a _lot_ of different hashing functions. This is still one of the largest
+bottlenecks. However, Wyhash is really hard to beat and nothing I tried was
+faster.
 
 # Takeaways
 
@@ -280,36 +289,39 @@ speed up execution. An example of this in practice can be seen with
 ## Measure first, then optimize.
 
 When I initially started, I thought I would be bottleneck more by the disk.
-However, my syscalls to `pread` where only a sliver of the execution time and
+However, the syscalls to `pread` where only a sliver of the execution time and
 therefore I never touched it.
 
-Additionally, I thought I would need to do at least some optimizing for the end
+Additionally, I thought there would be some need to optimize the final stage
 where the stations are sorted and the hash maps are reduced. However, those
 section of the code remain basically the same as the baseline implementation.
 
 # Math For Nerds
 
-After collecting empirical data about my optimizations, I wondered how they
-compared to the theoretical speedup Amdhal's Law predicts. For optimizations
-where I could measure the proportion of execution time before and after here are
-the theoretical speedups compared to the actual results.
+Now gripped with empirical data, I wondered how they compared to the
+theoretical speedup Amdhal's Law predicts. For optimizations where I could
+measure the proportion of execution time before and after here are the
+theoretical speedups compared to the actual results.
 
 | N | Optimization              | Theoretical Speedup (*S*) | Actual Speedup (*S'*) |
 |---|---------------------------|---------------------------|-----------------------|
 | 1 | Find semicolon in reverse | 1.529                     | 1.460                 |
 | 2 | Static allocation         | 1.657                     | 1.195                 |
 | 3 | Custom temperature parser | 1.485                     | 1.213                 |
-| 4 | Custom buffered reader    | -                         | 1.367                 |
 | 5 | Custom hash map           | 1.665                     | 1.044                 |
-| 6 | Multi-threaded            | -                         | 8.138                 |
 
+It is clear Amdhal's law over-predicts speedup potential here. I am guessing the
+margin of error associated with the profiler sample rate has an impact on the
+gap. I am curious about the reader's thoughts on this discrepancy.
 
 # Conclusion
 
-This challenge was really fun and rewarding! There were times when it was hard,
-but I didn't give up and it was so satisfying to see the execution time drop. I
-am relatively new to performance engineering so this was the perfect way to get
-my feet wet.
+This challenge was really fun and rewarding! Thank you [Gunnar
+Morling](https://www.morling.dev/) for creating such a valuable learning
+experience and fostering a community of great performance engineers. There were
+times when it was hard, but thankfully I didn't give up and it was so satisfying
+to see the execution time drop. I am relatively new to performance engineering
+so, this was the perfect way to get my feet wet.
 
 Furthermore, Zig is an awesome programming language and I'm going to continue to
 invest in learning it. It is such a simple language but gives you so much power
@@ -330,7 +342,7 @@ MacOS: 26.6.2 (25G83)
 Zig: 0.16.0
 ```
 
-# AI Usage
+# AI Disclaimer
 
 I used AI chat bots for assistance for learning Zig. However, all code for the
 challenge was written by hand and I used my ideas for optimizations. After
