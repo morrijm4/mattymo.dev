@@ -234,8 +234,6 @@ the proportion of execution for parsing and populating the maps. However, the
 beginning and end are nanoseconds of execution time so roughly speaking this
 stage accounts for 99.99% of execution time.
 
-I got to take advantage of the new Zig 0.16 `Io` interface which was very clean!
-
 ```zig
 var group: Io.Group = .init;
 for (intervals, tables) |int, table| {
@@ -243,6 +241,8 @@ for (intervals, tables) |int, table| {
 }
 try group.await(io);
 ```
+
+I got to take advantage of the new Zig 0.16 `Io` interface which was very clean!
 
 # Unsuccessful Optimizations
 
