@@ -297,8 +297,16 @@ barrier however, I'm going to hang up my hat. At least until another day.
 ## [Metal API](https://developer.apple.com/metal/)
 
 Finding the indexes for semicolons and newlines takes up the largest chunk of
-the time. I wonder if a GPU could help build a list of indexes that could then
-be used to parse out weather station names and temperatures.
+the time. I also think it could contribute to 33% of the time the CPU makes a
+bad branch prediction. 
+
+![Branch misprediction](/BranchMisprediction.png)
+
+While pondering ways to reduce branching, I wondered if a
+GPU could help build a list of indexes that could then be used to parse out
+weather station names and temperatures. With the indexes known a head of time,
+the number of branch mispredictions would theoretically go down resulting in
+less machine clears.
 
 ## Deepen the pipeline, and add streaming
 
