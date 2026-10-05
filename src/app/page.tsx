@@ -7,7 +7,7 @@ export default function Home() {
                 Hello!
             </h1>
             <p>
-                My name is Matthew Morrison. I am a software engineer, climber, guitarist, and golfer. I live in New York City and I am a graduate student at <a href="https://tech.cornell.edu/">Cornell Tech</a> earning a Master of Engineering in Computer Science degree.
+                My name is Matthew Morrison. I am a software engineer, climber, guitarist, and golfer. I live in New York City and I am a software engineer at Savvy Wealth.
             </p>
             I let my curiosity and interest direct my ambitions and I pursue my passions with great intensity. I focus on the journey and cherish what I learn from my experiences. I firmly believe I can accomplish anything when my mind is set on a goal.
             <p>
