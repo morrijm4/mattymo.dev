@@ -81,7 +81,7 @@ measured executions which were averaged together.
 Below is each optimization I added chronologically and its performance impact. I
 only included details about specific parts of the code so, if you have not
 attempted this challenge before, I'd encourage you to stop now and think how you
-would naively implement a solution for this challenge.
+would naively implement a solution.
 
 | N | Optimization               | Execution Time (s) | Speedup |
 |---|----------------------------|--------------------|---------|
@@ -112,9 +112,9 @@ while (try reader.takeDelimiter('\n')) |line| {
     const dim = std.mem.findScalar(u8, line, ';').?;
 ```
 
-By switching to searching from the end of the slice it dropped the proportion of
-execution time down to 5.5%. Additionally, we can start 3 bytes back because of
-the constraints of our data.
+By switching to searching from the end of the slice and starting 3 bytes back it
+dropped the proportion of execution time down to 5.5%. That dropped our
+execution time from 28 to 19 seconds.
 
 ```zig
 while (try reader.takeDelimiter('\n')) |line| {
@@ -126,8 +126,6 @@ while (try reader.takeDelimiter('\n')) |line| {
     //          ^
     const dim = findScalarLastPos(u8, line, line.len - 3, ';').?;
 ```
-
-That dropped our execution time from 28 to 19 seconds.
 
 ## Preallocate the hash map buffer
 
@@ -148,8 +146,8 @@ try map.ensureTotalCapacity(gpa, 10_000);
 
 Now, `parseFloat` became the bottleneck with a execution proportion of 31.3%. I
 wrote a float parser tailored to our temperature range while also switching to
-use integers before converting them back to floats. This drop the proportion of
-time spent parsing temperatures down to 3.6% and total execution time to 13
+use integers before converting them back to floats. This dropped the proportion
+of time spent parsing temperatures down to 3.6% and total execution time to 13
 seconds.
 
 ```zig
@@ -191,9 +189,9 @@ fn parseTemp(temp: []const u8) i16 {
 The next bottleneck was the buffered reader (I was dreading this the most). It
 accounted for 32.8% of total execution time. It took me multiple implementation
 attempts but I finally landed on a custom implementation that out performed the
-Zig standard library. I found measuring the new one was hard because was baked
-into the `main` function which it drowns it out. However, this dropped total
-execution time down to 9.7 seconds.
+Zig standard library. I found measuring the new one was hard because it was
+baked into the `main` function which drowns it out. However, this dropped
+total execution time down to 9.7 seconds.
 
 ```zig
 var off: usize = 0;
@@ -214,9 +212,9 @@ while (try pread(file, &buf, buf.len, off)) |n| {
 
 ## Custom hash map
 
-Then it was back to the hash map. It continued to take up 32.7% of the program.
+Then it was back to the hash map. It was back to taking up 32.7% of the program.
 I reasoned a custom implementation would need less code than a generic one
-provided by the standard library. Therefore, less code means less cycles and
+provided by the standard library. Therefore, less code meant less cycles and
 less execution time. I used the same hash function as the standard library
 `StringHashMap`, `Wyhash`, and used linear probing. This dropped the proportion
 of time spent in the `getOrPut` function to 19.1% and execution time to 9.3
@@ -265,8 +263,8 @@ I was able to use the new Zig 0.16 `Io` interface which was very clean!
 
 In the final program, `findScalarPos` continues to be a large bottleneck. I took
 a stab at implementing my own by combining SIMD instructions with loop unrolling
-but, that drove up the processor backend bottleneck counters way up and slowed
-down execution time. I concluded the Zig standard library has one hellava
+but, it only drove up the CPU backend bottleneck counters and slowed down
+execution time. I concluded the Zig standard library has one hellava
 [implementation](https://codeberg.org/ziglang/zig/src/commit/655bee8c75c19b82b8f2c730feec857e85e4991b/lib/std/mem.zig#L1309)
 so, shout out to them!
 
@@ -278,16 +276,15 @@ poor performance and it also caused a lot bugs (skill issue I know).
 
 ## Different hashing functions
 
-I tried a _lot_ of different hashing functions and additionally, this is still
-one of the largest bottlenecks as well. However, `Wyhash` is really hard to beat
-and nothing I tried was faster.
+I tried a _lot_ of different hashing functions However, `Wyhash` is really hard
+to beat and nothing I tried was faster.
 
 # Future Improvements
 
-I have reached the point where I am no longer bottlenecked at the function
-level. I believe improvements can only be made at an architectural level. I
-still have a couple of ideas on how to break the 1 second barrier but for now,
-I'm going to hang up my hat. At least until another day.
+I have reached the point where I feel I am no longer bottlenecked at the
+function level. Now, I believe improvements can only be made at an architectural
+level. I still have a couple of ideas on how to break the 1 second barrier
+however, I'm going to hang up my hat. At least until another day.
 
 ## [Metal API](https://developer.apple.com/metal/)
 
