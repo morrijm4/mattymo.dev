@@ -9,18 +9,18 @@ author: Matthew Morrison
 
 I recently attempted the [One Billion Row Challenge](https://1brc.dev/) (1BRC)
 using the [Zig](https://ziglang.org/) programming language and was able to
-optimize my program to execute in **1.14** seconds. In this blog, post I will
-discuss my methodology, the optimizations, and the takeaways I gleaned from this
+optimize my program to execute in **1.14** seconds. In this blog post, I will
+discuss my methodology, the optimizations, and my takeaways after attempting this
 challenge. 
 
 # What is the One Billion Row Challenge?
 
 [1BRC](https://github.com/gunnarmorling/1brc) originated in January 2023 as a
 casual programming challenge in the data processing community to test the
-performance limits of Java. The task is given a synthetic dataset with 1 billion
-rows, each consisting of the name of a weather station and a temperature, compute
-the minimum, maximum, and mean temperature for each station. Then, print the
-results to stdout in alphabetical order. The challenge hence spread across other
+performance limits of Java. The task is given a synthetic dataset of 1 billion
+rows, each consisting of a weather station and a temperature, compute the
+minimum, maximum, and mean temperature for each station. Then, print the results
+to stdout in alphabetical order. The challenge hence spread across other
 language communities and continues as a fun activity for recreational
 programmers.
 
@@ -52,7 +52,7 @@ Law](https://en.wikipedia.org/wiki/Amdahl%27s_law). The law states...
 
 Formally it is described as.
 
-*S* = 1 / (1 - *p*) + (*p* / *s*)
+*S* = 1 / ((1 - *p*) + (*p* / *s*))
 
 Where *S* is overall speedup, *p* is a proportion of a program execution, and
 *s* is the speedup of that proportion.
@@ -70,12 +70,16 @@ big thanks to the Apple and Zig teams.
 
 ![Instruments](/Instruments.png)
 
+I used [hyperfine](https://github.com/sharkdp/hyperfine) as the tool to measure
+execution time. I configured it to have 3 warm up runs and 10 measured
+executions which were averaged together.
+
 # Optimizations
 
 Below is each optimization I added chronologically and its performance impact. I
-used [hyperfine](https://github.com/sharkdp/hyperfine) as the tool to measure
-execution time. It was configured to have 3 warm up runs then 10 measured
-executions which were averaged together.
+only included details about specific parts of the code so, if you have not
+attempted this challenge before, I'd encourage you to stop now and think how you
+would naively implement a solution for this challenge.
 
 | N | Optimization               | Execution Time (s) | Speedup |
 |---|----------------------------|--------------------|---------|
@@ -96,9 +100,9 @@ baseline. Way to go Zig and LLVM teams!
 
 ## Finding the semicolon
 
-The initial implementation parsed each station and temperature first by taking a
+The initial implementation parsed each station and temperature by taking a
 [slice](https://ziglang.org/documentation/master/#Slices) of each line in the
-file. Followed by linearly searching for a semicolon from the beginning of the
+file. Followed by linearly searching for a semicolon from the beginning of each
 slice. This call to `findScalar` accounted for 33.0% of the execution time.
 
 ```zig
@@ -107,8 +111,8 @@ while (try reader.takeDelimiter('\n')) |line| {
 ```
 
 By switching to searching from the end of the slice it dropped the proportion of
-execution down to 5.5%. Additionally, we can start 3 bytes back because of the
-constraints of our data.
+execution time down to 5.5%. Additionally, we can start 3 bytes back because of
+the constraints of our data.
 
 ```zig
 while (try reader.takeDelimiter('\n')) |line| {
@@ -130,8 +134,9 @@ accounted for 32.7% of program execution. Drilling in further, an internal
 method, `isTombstone`, accounted for 13.7%. After perusing through the
 implementation a bit, I gathered just enough context to make an educated guess
 `isTombstone` is part of resizing the internal buffer. So, I preallocated the
-hash map to support 10,000 entries. This dropped `getOrPut` to 20.4% execution
-time and `isTombstone` to 0.4%! Dropping execution time to 16 seconds.
+hash map to support 10,000 entries. This dropped `getOrPut` to 20.4% of the
+execution time and `isTombstone` to 0.4%! Dropping total execution time to 16
+seconds.
 
 ```zig
 try map.ensureTotalCapacity(gpa, 10_000);
@@ -142,7 +147,8 @@ try map.ensureTotalCapacity(gpa, 10_000);
 Now, `parseFloat` became the bottleneck with a execution proportion of 31.3%. I
 wrote a float parser tailored to our temperature range while also switching to
 use integers before converting them back to floats. This drop the proportion of
-time spent parsing temperatures down to 3.6% and execution time to 13 seconds.
+time spent parsing temperatures down to 3.6% and total execution time to 13
+seconds.
 
 ```zig
 fn parseTemp(temp: []const u8) i16 {
@@ -180,12 +186,12 @@ fn parseTemp(temp: []const u8) i16 {
 
 ## Custom buffered reader
 
-Next was the buffered reader (I was dreading this the most). It took me multiple
-implementation attempts but I finally landed on one that out performed the Zig
-standard library. The original buffered reader accounted for 32.8% but measuring
-the new one was hard to do because it is now baked into the `main` function
-where it gets drowned out. However, this dropped execution time down to 9.7
-seconds.
+The next bottleneck was the buffered reader (I was dreading this the most). It
+accounted for 32.8% of total execution time. It took me multiple implementation
+attempts but I finally landed on a custom implementation that out performed the
+Zig standard library. I found measuring the new one was hard because was baked
+into the `main` function which it drowns it out. However, this dropped total
+execution time down to 9.7 seconds.
 
 ```zig
 var off: usize = 0;
@@ -255,11 +261,10 @@ I was able to use the new Zig 0.16 `Io` interface which was very clean!
 
 ## Custom `findScalarPos`
 
-In the final program, `findScalarPos` continues to be a large bottleneck and
-over the course of this challenge I took a stab at implementing my own. I tried
-to combine SIMD instructions and loop unrolling but, that drove up my processor
-backend bottleneck counters way up and slowed down execution time. I concluded
-the Zig standard library has one hellava
+In the final program, `findScalarPos` continues to be a large bottleneck. I took
+a stab at implementing my own by combining SIMD instructions with loop unrolling
+but, that drove up the processor backend bottleneck counters way up and slowed
+down execution time. I concluded the Zig standard library has one hellava
 [implementation](https://codeberg.org/ziglang/zig/src/commit/655bee8c75c19b82b8f2c730feec857e85e4991b/lib/std/mem.zig#L1309)
 so, shout out to them!
 
@@ -267,22 +272,22 @@ so, shout out to them!
 
 Before I went with a MapReduce implementation for the multi-threaded
 approach, I tried using one hash map with a mutex. However, this resulted in
-poor performance and it was also caused a lot bugs (skill issue).
+poor performance and it also caused a lot bugs (skill issue I know).
 
 ## Different hashing functions
 
-I tried a _lot_ of different hashing functions. This is still one of the largest
-bottlenecks as well. However, Wyhash is really hard to beat and nothing I tried
-was faster.
+I tried a _lot_ of different hashing functions and additionally, this is still
+one of the largest bottlenecks as well. However, `Wyhash` is really hard to beat
+and nothing I tried was faster.
 
 # Future Improvements
 
 I have reached the point where I am no longer bottlenecked at the function
 level. I believe improvements can only be made at an architectural level. I
 still have a couple of ideas on how to break the 1 second barrier but for now,
-I'm going to hang up my hat at least until another day.
+I'm going to hang up my hat. At least until another day.
 
-## Metal API
+## [Metal API](https://developer.apple.com/metal/)
 
 Finding the indexes for semicolons and newlines takes up the largest chunk of
 the time. I wonder if a GPU could help build a list of indexes that could then
@@ -299,7 +304,7 @@ to another and more steps in the pipeline were created (like the idea above).
 ## Less code is faster. 
 
 Just by implementing my own versions of standard library functions, I was able
-to remove extra code unnecessary for my application which ultimately reduced the
+to remove extra code unnecessary for my application and ultimately reduced the
 number of cycles in the hot path. This is apparent in the bespoke buffered
 reader, hash map, and temperature parser.
 
@@ -318,8 +323,8 @@ the syscalls to [`pread`](https://man7.org/linux/man-pages/man2/pread.2.html)
 where only a sliver of the execution time and therefore I never touched it.
 
 Additionally, I thought there would be some need to optimize the final stage
-where the stations are sorted and the hash maps are reduced. However, those
-section of the code remain basically the same as the baseline implementation.
+where the stations are sorted and the hash maps are reduced. However, that
+section of code remain basically the same as the baseline implementation.
 
 # Math For Nerds
 
