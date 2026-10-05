@@ -65,11 +65,12 @@ To identify choke points, I utilized Apple's profiler that ships with XCode,
 program's stack trace every 1 millisecond to provide estimates on the total time
 spent in each function. This is made possible because Zig emits
 [DWARF](https://dwarfstd.org/) compliant debug symbols so Instruments can map
-back to the source function names. It also can track hardware counters that can
-help you identify where in your processor pipeline your code is causing
+back to the source function names. It also can track [hardware performance
+counters](https://easyperf.net/blog/2019/02/09/Top-Down-performance-analysis-methodology)
+that can help you identify where in your processor pipeline your code is causing
 bottlenecks. Not to mention it also has a beautiful UI. The tool is incredibly
-powerful and there is a lot it can do but, that could be the topic of a
-different blog post.
+powerful and there is a lot it can do but, diving into Instruments could be the
+topic of a different blog post.
 
 ![Instruments](/Instruments.png)
 
