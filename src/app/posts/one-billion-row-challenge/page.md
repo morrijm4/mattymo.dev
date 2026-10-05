@@ -9,7 +9,7 @@ author: Matthew Morrison
 
 I recently attempted the [One Billion Row Challenge](https://1brc.dev/) (1BRC)
 using the [Zig](https://ziglang.org/) programming language and was able to
-optimize my program to execute in **1.14** seconds. In this blog post I will
+optimize my program to execute in **1.14** seconds. In this blog, post I will
 discuss my methodology, the optimizations, and the takeaways I gleaned from this
 challenge. 
 
@@ -18,7 +18,7 @@ challenge.
 [1BRC](https://github.com/gunnarmorling/1brc) originated in January 2023 as a
 casual programming challenge in the data processing community to test the
 performance limits of Java. The task is given a synthetic dataset with 1 billion
-rows each consisting of the name of a weather station and a temperature, compute
+rows, each consisting of the name of a weather station and a temperature, compute
 the minimum, maximum, and mean temperature for each station. Then, print the
 results to stdout in alphabetical order. The challenge hence spread across other
 language communities and continues as a fun activity for recreational
@@ -66,7 +66,7 @@ program's stack trace every 1 millisecond to provide estimates on the total time
 spent in each function. This is made possible because Zig emits
 [DWARF](https://dwarfstd.org/) compliant debug symbols so Instruments can map
 back to the source function names. Not to mention it also has a beautiful UI. So
-big thanks to the Apple and Zig teams 👏.
+big thanks to the Apple and Zig teams.
 
 ![Instruments](/Instruments.png)
 
@@ -96,9 +96,10 @@ baseline. Way to go Zig and LLVM teams!
 
 ## Finding the semicolon
 
-The initial implementation parsed each station and temperature first by taking
-a slice of each line in the file then, linearly searching for a semicolon. This
-call to `findScalar` accounted for 33.0% of the execution time.
+The initial implementation parsed each station and temperature first by taking a
+[slice](https://ziglang.org/documentation/master/#Slices) of each line in the
+file. Followed by linearly searching for a semicolon from the beginning of the
+slice. This call to `findScalar` accounted for 33.0% of the execution time.
 
 ```zig
 while (try reader.takeDelimiter('\n')) |line| {
@@ -124,7 +125,7 @@ That dropped our execution time from 28 to 19 seconds.
 
 ## Preallocate the hash map buffer
 
-The next bottleneck was the `getOrPut` method on our hash map. In total it
+The next bottleneck was the `getOrPut` method on the hash map. In total it
 accounted for 32.7% of program execution. Drilling in further, an internal
 method, `isTombstone`, accounted for 13.7%. After perusing through the
 implementation a bit, I gathered just enough context to make an educated guess
@@ -136,7 +137,7 @@ time and `isTombstone` to 0.4%! Dropping execution time to 16 seconds.
 try map.ensureTotalCapacity(gpa, 10_000);
 ```
 
-## Custom temperature parser + use integers
+## Custom temperature parser
 
 Now, `parseFloat` became the bottleneck with a execution proportion of 31.3%. I
 wrote a float parser tailored to our temperature range while also switching to
@@ -206,17 +207,17 @@ while (try pread(file, &buf, buf.len, off)) |n| {
 ## Custom hash map
 
 Then it was back to the hash map. It continued to take up 32.7% of the program.
-Given we had an upper bound on weather stations I reasoned a custom
-implementation would need less code than a generic one provided by the standard
-library. I used the same hash function as the standard library `StringHashMap`,
-`Wyhash`, and used linear probing. This drop the proportion to 19.1% and
-execution time to 9.3 seconds.
+I reasoned a custom implementation would need less code than a generic one
+provided by the standard library. Therefore, less code means less cycles and
+less execution time. I used the same hash function as the standard library
+`StringHashMap`, `Wyhash`, and used linear probing. This dropped the proportion
+of time spent in the `getOrPut` function to 19.1% and execution time to 9.3
+seconds.
 
-The guts of the implementation were in the `get` function (which acts like
-`getOrPut`).
+The guts of the implementation were in the `getOrPut` function.
 
 ```zig
-fn get(self: Table, key: []const u8) *Entry {
+fn getOrPut(self: Table, key: []const u8) *Entry {
     const hash = std.hash.Wyhash.hash(42, key);
     var i = hash % self.table.len;
     while (!self.table[i].isEmpty()) : (i = (i + 1) % self.table.len) {
@@ -231,7 +232,7 @@ fn get(self: Table, key: []const u8) *Entry {
 
 Finally, I implemented multi-threading. I used a
 [MapReduce](https://en.wikipedia.org/wiki/MapReduce) like technique where I
-split my input evenly on newlines and each worker had their own hash map it
+split my input evenly bounded on newlines and each worker had their own hash map it
 populated. After all workers finished, the maps were reduced into the final
 result. In an attempt to measure the proportion of execution for parsing and
 populating the maps, I added Zig's monotonic clock
@@ -274,12 +275,31 @@ I tried a _lot_ of different hashing functions. This is still one of the largest
 bottlenecks as well. However, Wyhash is really hard to beat and nothing I tried
 was faster.
 
+# Future Improvements
+
+I have reached the point where I am no longer bottlenecked at the function
+level. I believe improvements can only be made at an architectural level. I
+still have a couple of ideas on how to break the 1 second barrier but for now,
+I'm going to hang up my hat at least until another day.
+
+## Metal API
+
+Finding the indexes for semicolons and newlines takes up the largest chunk of
+the time. I wonder if a GPU could help build a list of indexes that could then
+be used to parse out weather station names and temperatures.
+
+## Deepen the pipeline, and add streaming
+
+Right now data does not start reducing until all jobs are finished. I wonder if
+the performance would improve if data was streamed from one part of the pipeline
+to another and more steps in the pipeline were created (like the idea above).
+
 # Takeaways
 
 ## Less code is faster. 
 
-Just by implementing my own version of the standard library functions, I was
-able to remove extra code unnecessary for my application which reduced the
+Just by implementing my own versions of standard library functions, I was able
+to remove extra code unnecessary for my application which ultimately reduced the
 number of cycles in the hot path. This is apparent in the bespoke buffered
 reader, hash map, and temperature parser.
 
@@ -303,10 +323,10 @@ section of the code remain basically the same as the baseline implementation.
 
 # Math For Nerds
 
-Now gripped with empirical data, I wondered how they compared to the theoretical
-speedup Amdhal's Law predicts. For optimizations where I could measure the
-proportion of execution time before and after, here are the theoretical speedups
-compared to the actual results.
+Now equipped with empirical speedup data, I wondered how it compared to the
+theoretical speedup that Amdhal's Law predicts. For optimizations where I could
+measure the proportion of execution time before and after, here are the
+theoretical speedups compared to the actual results.
 
 | N | Optimization              | Theoretical Speedup (*S*) | Actual Speedup (*S'*) |
 |---|---------------------------|---------------------------|-----------------------|
