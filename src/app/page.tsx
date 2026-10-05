@@ -20,6 +20,11 @@ export default function Home() {
             <h1 className="flex items-center gap-2">
                 Experience
             </h1>
+            <h3>Savvy Wealth</h3>
+            <p>June 2026 - present</p>
+            <ul>
+                <li>Software Engineer</li>
+            </ul>
             <h3>Asurion</h3>
             <p>May 2022 - Jul 2025</p>
             <ul>
