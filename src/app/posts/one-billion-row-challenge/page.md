@@ -285,7 +285,7 @@ poor performance and it also caused a lot bugs (skill issue I know).
 
 ## Different hashing functions
 
-I tried a _lot_ of different hashing functions However, `Wyhash` is really hard
+I tried a _lot_ of different hashing functions however, `Wyhash` is really hard
 to beat and nothing I tried was faster.
 
 # Future Improvements
