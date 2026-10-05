@@ -34,8 +34,8 @@ Hamburg;-34.2
 ```
 
 The challenge laid out a list of rules and constraints about the inputs. For
-this blog post, here are the constraints with most relevance. You can find the full
-list of rules [here](https://1brc.dev/#rules-and-limits).
+this blog post, here are the constraints with the most relevance. You can find
+the full list of rules [here](https://1brc.dev/#rules-and-limits).
 
 - There are at most 10,000 unique weather stations.
 - A station name has a max length of 100 bytes.
@@ -65,8 +65,9 @@ To identify choke points, I utilized Apple's profiler that ships with XCode,
 program's stack trace every 1 millisecond to provide estimates on the total time
 spent in each function. This is made possible because Zig emits
 [DWARF](https://dwarfstd.org/) compliant debug symbols so Instruments can map
-back to the source function names. Not to mention it also has a beautiful UI. So
-big thanks to the Apple and Zig teams.
+back to the source function names. It also can track hardware counters that can
+help you identify where in your processor pipeline your code is causing
+bottlenecks. Not to mention it also has a beautiful UI.
 
 ![Instruments](/Instruments.png)
 
