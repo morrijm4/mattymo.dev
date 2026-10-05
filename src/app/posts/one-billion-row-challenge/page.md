@@ -245,14 +245,16 @@ fn getOrPut(self: Table, key: []const u8) *Entry {
 
 Finally, I implemented multi-threading. I used a
 [MapReduce](https://en.wikipedia.org/wiki/MapReduce) like technique where I
-split my input evenly bounded on newlines and each worker had their own hash map it
-populated. After all workers finished, the maps were reduced into the final
-result. In an attempt to measure the proportion of execution for parsing and
-populating the maps, I added Zig's monotonic clock
-(`std.Io.Clock.awake.now(io)`). However, the beginning and end are nanoseconds
-of execution time so roughly speaking this stage accounts for 99.99% of
-execution time and continues to be the bulk of the program after the added
-parallelism.
+split my input evenly bounded on newlines and each worker had their own hash map
+it populated. I matched the number of workers to the number of CPU cores on my
+machine which was 12. After all workers finished, the maps were reduced into the
+final result. 
+
+I measured the proportion of execution time for parsing and populating the maps
+with Zig's monotonic clock (`std.Io.Clock.awake.now(io)`). However, the sections
+outside of processing all 1 billion rows are only nanoseconds. So, roughly
+speaking, this processing stage accounts for 99.99% of execution time and
+continues to be the bulk of the program after the added parallelism.
 
 ```zig
 var group: Io.Group = .init;
