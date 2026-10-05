@@ -1,6 +1,6 @@
 ---
 title: One Billion Row Challenge
-description: 1BRC in 1.14 seconds using the Zig programming language.
+description: 1BRC in 1.12 seconds using the Zig programming language.
 date: 2026-09-26T20:16:41.046Z
 tag: 1brc, zig, optimization, performance
 category: Programming
@@ -9,7 +9,7 @@ author: Matthew Morrison
 
 I recently attempted the [One Billion Row Challenge](https://1brc.dev/) (1BRC)
 using the [Zig](https://ziglang.org/) programming language and was able to
-optimize my program to execute in **1.14** seconds. In this blog post, I will
+optimize my program to execute in **1.12** seconds. In this blog post, I will
 discuss my methodology, the optimizations, and my takeaways after attempting this
 challenge. 
 
@@ -34,7 +34,7 @@ Hamburg;-34.2
 ```
 
 The challenge laid out a list of rules and constraints about the inputs. For
-this blog post, here are the ones with most relevance. You can find the full
+this blog post, here are the constraints with most relevance. You can find the full
 list of rules [here](https://1brc.dev/#rules-and-limits).
 
 - There are at most 10,000 unique weather stations.
@@ -54,7 +54,7 @@ Formally it is described as.
 
 *S* = 1 / ((1 - *p*) + (*p* / *s*))
 
-Where *S* is overall speedup, *p* is a proportion of a program execution, and
+Where *S* is overall speedup, *p* is a proportion of program execution, and
 *s* is the speedup of that proportion.
 
 This distills down to if you optimize the bottleneck of your system, it will
@@ -70,9 +70,11 @@ big thanks to the Apple and Zig teams.
 
 ![Instruments](/Instruments.png)
 
-I used [hyperfine](https://github.com/sharkdp/hyperfine) as the tool to measure
-execution time. I configured it to have 3 warm up runs and 10 measured
-executions which were averaged together.
+Additionally, I used [hyperfine](https://github.com/sharkdp/hyperfine) as the
+tool to measure execution time. I configured it to have 3 warm up runs and 10
+measured executions which were averaged together.
+
+![hyperfine](/hyperfine.png)
 
 # Optimizations
 
@@ -90,7 +92,7 @@ would naively implement a solution for this challenge.
 | 3 | Custom temperature parser  | 13.231             | 1.213   |
 | 4 | Custom buffered reader     | 9.681              | 1.367   |
 | 5 | Custom hash map            | 9.277              | 1.044   |
-| 6 | Multi-threaded             | **1.140**          | 8.138   |
+| 6 | Multi-threaded             | **1.118**          | 8.138   |
 
 ## Implement it in Zig!
 
