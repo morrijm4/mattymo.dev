@@ -67,7 +67,9 @@ spent in each function. This is made possible because Zig emits
 [DWARF](https://dwarfstd.org/) compliant debug symbols so Instruments can map
 back to the source function names. It also can track hardware counters that can
 help you identify where in your processor pipeline your code is causing
-bottlenecks. Not to mention it also has a beautiful UI.
+bottlenecks. Not to mention it also has a beautiful UI. The tool is incredibly
+powerful and there is a lot it can do but, that could be the topic of a
+different blog post.
 
 ![Instruments](/Instruments.png)
 
@@ -79,10 +81,7 @@ measured executions which were averaged together.
 
 # Optimizations
 
-Below is each optimization I added chronologically and its performance impact. I
-only included details about specific parts of the code so, if you have not
-attempted this challenge before, I'd encourage you to stop now and think how you
-would naively implement a solution.
+Below is each optimization I added chronologically and its performance impact. 
 
 | N | Optimization               | Execution Time (s) | Speedup |
 |---|----------------------------|--------------------|---------|
@@ -94,6 +93,11 @@ would naively implement a solution.
 | 4 | Custom buffered reader     | 9.681              | 1.367   |
 | 5 | Custom hash map            | 9.277              | 1.044   |
 | 6 | Multi-threaded             | **1.118**          | 8.138   |
+
+I did not cover all details of my implementation, only details about specific
+parts of the code partaining to each optimization. So, if you have not attempted
+this challenge before, I'd encourage you to stop now and think how you would
+naively implement a solution to have some grounding on the topic.
 
 ## Implement it in Zig!
 
