@@ -297,8 +297,8 @@ barrier however, I'm going to hang up my hat. At least until another day.
 ## [Metal API](https://developer.apple.com/metal/)
 
 Finding the indexes for semicolons and newlines takes up the largest chunk of
-the time. I also think it could contribute to 33% of the time the CPU makes a
-bad branch prediction. 
+the time. I also think it could contribute to roughly a third of the time the
+CPU makes a branch misprediction. 
 
 ![Branch misprediction](/BranchMisprediction.png)
 
