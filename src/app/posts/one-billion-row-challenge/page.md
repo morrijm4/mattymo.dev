@@ -97,7 +97,7 @@ Below is each optimization I added chronologically and its performance impact.
 | 6 | Multi-threaded             | **1.118**          | 8.138   |
 
 I did not cover all details of my implementation, only details about specific
-parts of the code partaining to each optimization. So, if you have not attempted
+parts of the code pertaining to each optimization. So, if you have not attempted
 this challenge before, I'd encourage you to stop now and think how you would
 naively implement a solution to have some grounding on the topic.
 
@@ -290,7 +290,7 @@ to beat and nothing I tried was faster.
 
 # Future Improvements
 
-I belive I have reached the point where improvements can only be made at an
+I believe I have reached the point where improvements can only be made at an
 architectural level. I still have a couple of ideas on how to break the 1 second
 barrier however, I'm going to hang up my hat. At least until another day.
 
